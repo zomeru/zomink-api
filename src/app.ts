@@ -1,5 +1,5 @@
 import express from 'express';
-import cors, { CorsOptions } from 'cors';
+import cors from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import hpp from 'hpp';
@@ -16,7 +16,27 @@ dotenv.config();
 
 const app = express();
 
-app.use(cors());
+const whitelist = [
+  'https://zom.ink',
+  'http://zom.ink',
+  'https://76.76.21.21',
+  'http://76.76.21.21',
+  process.env.CLIENT_ORIGIN as string,
+];
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || whitelist.indexOf(origin) !== -1) {
+        callback(null, true);
+      } else {
+        callback(new Error('Not allowed by CORS'));
+      }
+    },
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  })
+);
 app.use(cookieParser());
 
 app.use(helmet());
@@ -36,6 +56,10 @@ app.use(
 );
 
 app.use(deserializeUser);
+
+app.get('/', (req, res) => {
+  res.send('Zomink');
+});
 
 app.use('/api', router);
 
