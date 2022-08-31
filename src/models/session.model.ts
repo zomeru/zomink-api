@@ -8,6 +8,9 @@ export class Session {
 
   @prop({ default: true })
   valid: boolean;
+
+  @prop()
+  userAgent: string;
 }
 
 const SessionModel = getModelForClass(Session, {

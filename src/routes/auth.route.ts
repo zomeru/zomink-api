@@ -3,6 +3,7 @@ import express from 'express';
 import validateResource from '../middlewares/validateResource';
 import {
   createSessionHandler,
+  logoutHandler,
   refreshAccessTokenHandler,
 } from '../controllers/auth.controller';
 import { createSessionSchema } from '../schema/auth.schema';
@@ -16,5 +17,7 @@ router.post(
 );
 
 router.post('/session/refresh', refreshAccessTokenHandler);
+
+router.post('/session/logout', logoutHandler);
 
 export default router;

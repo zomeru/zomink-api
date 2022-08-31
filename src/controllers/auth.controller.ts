@@ -1,77 +1,133 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { get } from 'lodash';
+import Cookies from 'cookies';
 
 import { CreateSessionInput } from '../schema/auth.schema';
 import {
+  // createSession,
   findSessionById,
   signAccessToken,
   signRefreshToken,
 } from '../services/auth.service';
-import { findUserByEmail, findUserById } from '../services/user.service';
-import { verifyJwt } from '../utils/jwt';
+import {
+  // findUserByEmail,
+  findUserById,
+  findUserByEmailOrUsername,
+} from '../services/user.service';
+import { verifyJwt, VerifyJwtResult } from '../utils/jwt';
+import { ACCESS_TOKEN_TTL, REFRESH_TOKEN_TTL } from '../configs';
+import cookieOptions from '../utils/cookieOption';
+import catchAsync from '../utils/catchAsync';
+import { AppError } from '../utils/appError';
 
-export async function createSessionHandler(
-  req: Request<{}, {}, CreateSessionInput>,
-  res: Response
-) {
-  const errorMessage = 'Invalid email or password';
+export const createSessionHandler = catchAsync(
+  async (
+    req: Request<{}, {}, CreateSessionInput>,
+    res: Response,
+    next: NextFunction
+  ) => {
+    const errorMessage = 'Invalid email or password';
 
-  const { email, password } = req.body;
+    const { email, password } = req.body;
 
-  const user = await findUserByEmail(email);
+    // const user = await findUserByEmail(email);
+    const user = await findUserByEmailOrUsername(email);
 
-  if (!user) {
-    return res.send(errorMessage);
+    if (!user) {
+      // return res.status(401).json({ errorMessage });
+      return next(new AppError('UnauthorizedException', errorMessage));
+    }
+
+    // if (!user.verified) {
+    //   return res.send('Please verify your email');
+    // }
+
+    const isValidPassword = await user.validatePassword(password);
+
+    if (!isValidPassword) {
+      // return res.status(401).json({ errorMessage });
+      return next(new AppError('UnauthorizedException', errorMessage));
+    }
+
+    // sign a access token
+    const accessToken = signAccessToken(user);
+
+    // sign a refresh token
+    const refreshToken = await signRefreshToken({ userId: user._id });
+
+    const cAT = new Cookies(req, res);
+    const cFT = new Cookies(req, res);
+
+    cAT.set('accessToken', accessToken, cookieOptions(ACCESS_TOKEN_TTL));
+
+    cFT.set('refreshToken', refreshToken, cookieOptions(REFRESH_TOKEN_TTL));
+
+    // send tokens
+    return res.status(200).json({
+      accessToken,
+      refreshToken,
+    });
   }
+);
 
-  if (!user.verified) {
-    return res.send('Please verify your email');
+export const refreshAccessTokenHandler = catchAsync(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const refreshToken =
+      get(req, 'cookies.refreshToken') || get(req, 'headers.x-refresh');
+
+    const { decoded } = verifyJwt(
+      refreshToken,
+      'REFRESH_TOKEN_PUBLIC_KEY'
+    ) as VerifyJwtResult;
+
+    if (!decoded) {
+      // return res
+      //   .status(401)
+      //   .json({ message: 'Could not refresh access token' });
+      return next(
+        new AppError('UnauthorizedException', 'Could not refresh access token')
+      );
+    }
+
+    const session = await findSessionById(decoded.session);
+
+    if (!session || !session.valid) {
+      return next(
+        new AppError('UnauthorizedException', 'Could not refresh access token')
+      );
+    }
+
+    const user = await findUserById(String(session.user));
+
+    if (!user) {
+      return next(
+        new AppError('UnauthorizedException', 'Could not refresh access token')
+      );
+    }
+
+    const accessToken = signAccessToken(user);
+
+    return res.status(200).json({ accessToken });
   }
+);
 
-  const isValidPassword = await user.validatePassword(password);
+export const logoutHandler = catchAsync(async (req: Request, res: Response) => {
+  const cookies = new Cookies(req, res);
 
-  if (!isValidPassword) {
-    return res.send(errorMessage);
-  }
+  res.locals.user = null;
 
-  // sign a access token
-  const accessToken = signAccessToken(user);
+  cookies.set('accessToken', '', cookieOptions(0));
+  cookies.set('refreshToken', '', cookieOptions(0));
 
-  // sign a refresh token
-  const refreshToken = await signRefreshToken({ userId: user._id });
+  res.clearCookie('accessToken');
+  res.clearCookie('refreshToken');
 
-  // send tokens
-  return res.send({
-    accessToken,
-    refreshToken,
+  return res.status(200).json({
+    success: true,
+    message: 'Logged out successfully',
   });
-}
+});
 
-export async function refreshAccessTokenHandler(req: Request, res: Response) {
-  const refreshToken = get(req, 'headers.x-refresh');
+// export async function logoutHandler(req: Request, res: Response) {
 
-  const decoded = verifyJwt<{ session: string }>(
-    refreshToken,
-    'REFRESH_TOKEN_PUBLIC_KEY'
-  );
-
-  if (!decoded) {
-    return res.status(401).send('Could not refresh access token');
-  }
-
-  const session = await findSessionById(decoded.session);
-
-  if (!session || !session.valid) {
-    return res.status(401).send('Could not refresh access token');
-  }
-
-  const user = await findUserById(String(session.user));
-
-  if (!user) {
-    return res.status(401).send('Could not refresh access token');
-  }
-
-  const accessToken = signAccessToken(user);
-
-  return res.send({ accessToken });
-}
+// }
