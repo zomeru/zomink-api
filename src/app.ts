@@ -35,6 +35,15 @@ app.use(
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+    // allow all headers
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'Accept',
+      'Origin',
+      'x-refresh',
+    ],
+    exposedHeaders: ['x-refresh'],
   })
 );
 app.use(cookieParser());

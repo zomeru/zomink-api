@@ -1,37 +1,56 @@
 import nodemailer, { SendMailOptions } from 'nodemailer';
+import { google } from 'googleapis';
+import smtpTransport from 'nodemailer-smtp-transport';
 
 import log from './logger';
 
-// async function createTestCreds() {
-//   const creds = await nodemailer.createTestAccount();
-//   console.log({ creds });
-// }
-
-// createTestCreds();
-
-const smtp = {
-  user: process.env.SMTP_USER as string,
-  pass: process.env.SMTP_PASS as string,
-  host: process.env.SMTP_HOST as string,
-  port: Number(process.env.SMTP_USER),
-};
-
-const transporter = nodemailer.createTransport({
-  ...smtp,
-  auth: {
-    user: smtp.user,
-    pass: smtp.pass,
-  },
+const oAuth2Client = new google.auth.OAuth2(
+  process.env.GOOGLE_CLIENT_ID,
+  process.env.GOOGLE_CLIENT_SECRET,
+  process.env.GOOGLE_REDIRECT_URL
+);
+oAuth2Client.setCredentials({
+  refresh_token: process.env.GOOGLE_REFRESH_TOKEN as string,
 });
 
 async function sendEmail(payload: SendMailOptions) {
-  transporter.sendMail(payload, (err, info) => {
-    if (err) {
-      log.error(err, 'Error sending email');
-    }
+  try {
+    const accessToken = await oAuth2Client.getAccessToken();
 
-    log.info(`Preview URL: ${nodemailer.getTestMessageUrl(info)}`);
-  });
+    const transport = nodemailer.createTransport(
+      smtpTransport({
+        service: 'gmail',
+        auth: {
+          type: 'OAuth2',
+          user: process.env.SMTP_USER,
+          clientId: process.env.GOOGLE_CLIENT_ID,
+          clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+          refreshToken: process.env.GOOGLE_REFRESH_TOKEN,
+          accessToken: accessToken as string,
+        },
+      })
+    );
+
+    const mailOptions = {
+      from: `ZOMINK - ${process.env.SMTP_USER}`,
+      to: payload.to,
+      subject: payload.subject,
+      text: payload.text,
+      html: `<h1>${payload.text}</h1>`,
+    };
+
+    const result = await transport.sendMail(mailOptions, (err, info) => {
+      if (err) {
+        log.error(err, 'Error sending email');
+      }
+
+      log.info(`Preview URL: ${nodemailer.getTestMessageUrl(info)}`);
+    });
+
+    return result;
+  } catch (error) {
+    log.error(error, 'Error sending email');
+  }
 }
 
 export default sendEmail;
