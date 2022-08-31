@@ -1,5 +1,4 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
-const { build } = require('esbuild');
+import { build } from 'esbuild';
 
 const options = {
   bundle: true,
