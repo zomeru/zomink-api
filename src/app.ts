@@ -1,5 +1,5 @@
 import express from 'express';
-import cors from 'cors';
+import cors, { CorsOptions } from 'cors';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import hpp from 'hpp';
@@ -16,9 +16,31 @@ dotenv.config();
 
 const app = express();
 
-const corsOptions = {
-  origin: process.env.CLIENT_ORIGIN as string,
+const whitelist = [
+  'http://zom.ink',
+  'http://zom.ink/',
+  'http://www.zom.ink/',
+  'http://www.zom.ink',
+  'https://zomink-client.vercel.app/',
+  'https://zomink-client.vercel.app',
+];
+
+const corsOptions: CorsOptions = {
+  origin: (origin, callback) => {
+    if (whitelist.indexOf(origin!) !== -1) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
   credentials: true,
+  // add more options here
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
+  allowedHeaders: [
+    'Content-Type,X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5,  Date, X-Api-Version, X-File-Name',
+  ],
+  exposedHeaders: ['Authorization'],
+  optionsSuccessStatus: 200,
 };
 
 app.use(cors(corsOptions));
@@ -48,8 +70,14 @@ app.use(globalErrorHandler);
 
 const { PORT } = process.env;
 
+const isDev = process.env.NODE_ENV === 'development';
+
 app.listen(PORT, () => {
-  log.info(`Server started at http://localhost:${PORT}`);
+  log.info(
+    `Server started at ${isDev ? 'http://localhost' : 'https://zom.ink'}:${
+      PORT || 8000
+    }`
+  );
 
   connectToDb();
 });
