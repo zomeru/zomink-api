@@ -4,6 +4,7 @@ import helmet from 'helmet';
 import morgan from 'morgan';
 import hpp from 'hpp';
 import cookieParser from 'cookie-parser';
+import dotenv from 'dotenv';
 
 import connectToDb from './utils/connectToDb';
 import log from './utils/logger';
@@ -11,7 +12,7 @@ import router from './routes';
 import deserializeUser from './middlewares/deserializeUser';
 import globalErrorHandler from './controllers/error.controller';
 
-require('dotenv').config();
+dotenv.config();
 
 const app = express();
 
