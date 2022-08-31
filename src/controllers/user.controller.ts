@@ -29,12 +29,17 @@ export const createUserHandler = catchAsync(
     try {
       const user = await createUser(body);
 
-      await sendEmail({
-        from: 'test@example.com',
+      sendEmail({
         to: user.email,
         subject: 'Please verify your email',
         text: `Verification code: ${user.verificationCode}. ID: ${user._id}`,
-      });
+      })
+        .then((emailRes) => {
+          log.info(emailRes, 'Email sent');
+        })
+        .catch((err) => {
+          log.error(err, 'Error sending email');
+        });
 
       // return res.send('User successfully created');
 
@@ -127,7 +132,7 @@ export const forgotPasswordHandler = catchAsync(
 
     await sendEmail({
       to: user.email,
-      from: 'test@example.com',
+      from: process.env.MAILER_FROM as string,
       subject: 'Password reset',
       text: `Password reset code: ${passwordResetCode}, User ID: ${user._id}`,
     });
