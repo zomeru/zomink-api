@@ -16,34 +16,7 @@ dotenv.config();
 
 const app = express();
 
-const whitelist = [
-  'http://zom.ink',
-  'http://zom.ink/',
-  'http://www.zom.ink/',
-  'http://www.zom.ink',
-  'https://zomink-client.vercel.app/',
-  'https://zomink-client.vercel.app',
-];
-
-const corsOptions: CorsOptions = {
-  origin: (origin, callback) => {
-    if (whitelist.indexOf(origin!) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
-  // add more options here
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
-  allowedHeaders: [
-    'Content-Type,X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5,  Date, X-Api-Version, X-File-Name',
-  ],
-  exposedHeaders: ['Authorization'],
-  optionsSuccessStatus: 200,
-};
-
-app.use(cors(corsOptions));
+app.use(cors());
 app.use(cookieParser());
 
 app.use(helmet());
