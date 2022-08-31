@@ -2,7 +2,7 @@ import { NextFunction, Request, Response } from 'express';
 import catchAsync from '../utils/catchAsync';
 
 const requireUser = catchAsync(
-  async (req: Request, res: Response, next: NextFunction) => {
+  async (_req: Request, res: Response, next: NextFunction) => {
     const { user } = res.locals;
 
     if (!user) {

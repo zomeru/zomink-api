@@ -65,10 +65,10 @@ const sendErrorProd = (err: any, res: Response) => {
 
 const globalErrorHandler = (
   err: any,
-  req: Request,
+  _req: Request,
   res: Response,
   // eslint-disable-next-line no-unused-vars
-  next: NextFunction
+  _next: NextFunction
 ) => {
   // console.log(err.stack);
   /* eslint-disable no-param-reassign */
