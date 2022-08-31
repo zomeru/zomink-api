@@ -169,7 +169,7 @@ export const resetPasswordHandler = catchAsync(
   }
 );
 
-export async function getCurrentUserHandler(req: Request, res: Response) {
+export async function getCurrentUserHandler(_req: Request, res: Response) {
   const { user } = res.locals;
   // req.session.user
   return res.status(200).json({ user });

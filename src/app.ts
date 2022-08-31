@@ -57,7 +57,7 @@ app.use(
 
 app.use(deserializeUser);
 
-app.get('/', (req, res) => {
+app.get('/', (_req, res) => {
   res.send('Zomink');
 });
 
