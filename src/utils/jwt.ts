@@ -16,19 +16,34 @@ export function signJwt(
   });
 }
 
-export function verifyJwt<T>(
+export type VerifyJwtResult = {
+  decoded: { session: string } | null;
+  expired: boolean;
+  valid: boolean;
+};
+
+export function verifyJwt(
   token: string,
   keyName: 'ACCESS_TOKEN_PUBLIC_KEY' | 'REFRESH_TOKEN_PUBLIC_KEY'
-): T | null {
+): VerifyJwtResult | null {
   const publicKey = Buffer.from(
     process.env[keyName] as string,
     'base64'
   ).toString('ascii');
 
   try {
-    const decoded = jwt.verify(token, publicKey) as T;
-    return decoded;
+    const decoded = jwt.verify(token, publicKey);
+    return {
+      valid: true,
+      expired: false,
+      decoded: decoded as { session: string },
+    };
   } catch (error: any) {
-    return null;
+    // return null;
+    return {
+      valid: false,
+      expired: error.message === 'jwt expired',
+      decoded: null,
+    };
   }
 }

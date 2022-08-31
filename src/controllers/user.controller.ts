@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { nanoid } from 'nanoid';
 
 import {
@@ -9,125 +9,168 @@ import {
 } from '../schema/user.schema';
 import {
   createUser,
-  findUserByEmail,
+  // findUserByEmail,
+  findUserByEmailOrUsername,
   findUserById,
 } from '../services/user.service';
+import { AppError } from '../utils/appError';
+import catchAsync from '../utils/catchAsync';
 import log from '../utils/logger';
 import sendEmail from '../utils/mailer';
 
-export async function createUserHandler(
-  req: Request<{}, {}, CreateUserInput>,
-  res: Response
-) {
-  const { body } = req;
+export const createUserHandler = catchAsync(
+  async (
+    req: Request<{}, {}, CreateUserInput>,
+    res: Response,
+    next: NextFunction
+  ) => {
+    const { body } = req;
 
-  try {
-    const user = await createUser(body);
+    try {
+      const user = await createUser(body);
 
-    await sendEmail({
-      from: 'test@example.com',
-      to: user.email,
-      subject: 'Please verify your email',
-      text: `Verification code: ${user.verificationCode}. ID: ${user._id}`,
-    });
+      await sendEmail({
+        from: 'test@example.com',
+        to: user.email,
+        subject: 'Please verify your email',
+        text: `Verification code: ${user.verificationCode}. ID: ${user._id}`,
+      });
 
-    return res.send('User successfully created');
-  } catch (error: any) {
-    if (error.code === 11000) {
-      return res.status(400).send('An account with this email already exists');
+      // return res.send('User successfully created');
+
+      const newUser: any = user.toObject();
+      delete newUser.password;
+      delete newUser.verificationCode;
+      delete newUser.__v;
+
+      // return sendData(res, newUser, 200, 'success');
+      return res.status(200).json({
+        success: true,
+        user: newUser,
+      });
+    } catch (error: any) {
+      if (error.code === 11000) {
+        return next(
+          new AppError(
+            'BadRequestException',
+            'An account with this email or username already exists'
+          )
+        );
+      }
+
+      return next(new AppError('InternalServerErrorException', error.message));
+    }
+  }
+);
+
+export const verifyUserHandler = catchAsync(
+  async (req: Request<VerifyUserInput>, res: Response, next: NextFunction) => {
+    const { id, verificationCode } = req.params;
+
+    const user = await findUserById(id);
+
+    if (!user) {
+      // return res.send('Could not verify user');
+
+      return next(new AppError('NotFoundException', 'User not found'));
     }
 
-    return res.status(500).send(error);
+    if (user.verified) {
+      return next(
+        new AppError('NotFoundException', 'User is already verified')
+      );
+    }
+
+    if (user.verificationCode === verificationCode) {
+      user.verified = true;
+
+      await user.save();
+
+      return res.status(200).json({
+        success: true,
+        message: 'User successfully verified',
+      });
+    }
+
+    return next(new AppError('NotFoundException', 'Could not verify user'));
   }
-}
+);
 
-export async function verifyUserHandler(
-  req: Request<VerifyUserInput>,
-  res: Response
-) {
-  const { id, verificationCode } = req.params;
+export const forgotPasswordHandler = catchAsync(
+  async (req: Request<{}, {}, ForgotPasswordInput>, res: Response) => {
+    const message =
+      'If a user with this is registered, an email will be sent to them with a password reset link';
 
-  const user = await findUserById(id);
+    const json = {
+      success: true,
+      message,
+    };
 
-  if (!user) {
-    return res.send('Could not verify user');
-  }
+    const { email } = req.body;
 
-  if (user.verified) {
-    return res.send('User is already verified');
-  }
+    // const user = await findUserByEmail(email);
+    const user = await findUserByEmailOrUsername(email);
 
-  if (user.verificationCode === verificationCode) {
-    user.verified = true;
+    if (!user) {
+      log.debug(`User with email ${email} not found`);
+      return res.status(200).json(json);
+    }
 
+    if (!user.verified) {
+      log.debug(`User with email ${email} is not verified`);
+      return res.status(200).json(json);
+    }
+
+    const passwordResetCode = nanoid();
+    user.passwordResetCode = passwordResetCode;
     await user.save();
 
-    return res.send('User successfully verified');
+    await sendEmail({
+      to: user.email,
+      from: 'test@example.com',
+      subject: 'Password reset',
+      text: `Password reset code: ${passwordResetCode}, User ID: ${user._id}`,
+    });
+
+    log.debug(`Password reset code sent to ${user.email}`);
+    return res.status(200).json({ message });
   }
+);
 
-  return res.send('Could not verify user');
-}
+export const resetPasswordHandler = catchAsync(
+  async (
+    req: Request<ResetPasswordInput['params'], {}, ResetPasswordInput['body']>,
+    res: Response,
+    next: NextFunction
+  ) => {
+    const { id, passwordResetCode } = req.params;
+    const { password } = req.body;
 
-export async function forgotPasswordHandler(
-  req: Request<{}, {}, ForgotPasswordInput>,
-  res: Response
-) {
-  const message =
-    'If a user with this is registered, an email will be sent to them with a password reset link';
+    const user = await findUserById(id);
 
-  const { email } = req.body;
+    if (
+      !user ||
+      !user.passwordResetCode ||
+      user.passwordResetCode !== passwordResetCode
+    ) {
+      return next(
+        new AppError('BadRequestException', 'Could not reset password')
+      );
+    }
 
-  const user = await findUserByEmail(email);
+    user.passwordResetCode = null;
+    user.password = password;
+    await user.save();
 
-  if (!user) {
-    log.debug(`User with email ${email} not found`);
-    return res.send(message);
+    return res.status(200).json({
+      success: true,
+      message: 'Successfully updated password',
+    });
   }
-
-  if (!user.verified) {
-    log.debug(`User with email ${email} is not verified`);
-    return res.send(message);
-  }
-
-  const passwordResetCode = nanoid();
-  user.passwordResetCode = passwordResetCode;
-  await user.save();
-
-  await sendEmail({
-    to: user.email,
-    from: 'test@example.com',
-    subject: 'Password reset',
-    text: `Password reset code: ${passwordResetCode}, User ID: ${user._id}`,
-  });
-
-  log.debug(`Password reset code sent to ${user.email}`);
-  return res.send(message);
-}
-
-export async function resetPasswordHandler(
-  req: Request<ResetPasswordInput['params'], {}, ResetPasswordInput['body']>,
-  res: Response
-) {
-  const { id, passwordResetCode } = req.params;
-  const { password } = req.body;
-
-  const user = await findUserById(id);
-
-  if (
-    !user ||
-    !user.passwordResetCode ||
-    user.passwordResetCode !== passwordResetCode
-  ) {
-    return res.status(400).send('Could not reset password');
-  }
-
-  user.passwordResetCode = null;
-  user.password = password;
-  await user.save();
-
-  return res.send('Successfully updated password');
-}
+);
 
 export async function getCurrentUserHandler(req: Request, res: Response) {
-  return res.send(res.locals.user);
+  const { user } = res.locals;
+  // req.session.user
+  return res.status(200).json({ user });
 }

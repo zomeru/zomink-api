@@ -30,7 +30,7 @@ export const privateFields = [
   // eslint-disable-next-line no-useless-return
   return;
 })
-@index({ email: 1 })
+@index({ email: 1, username: 1 })
 @modelOptions({
   schemaOptions: {
     timestamps: true,
@@ -42,6 +42,9 @@ export const privateFields = [
 export class User {
   @prop({ lowercase: true, required: true, unique: true })
   email: string;
+
+  @prop({ lowercase: true, required: true, unique: true })
+  username: string;
 
   @prop({ required: true })
   firstName: string;
