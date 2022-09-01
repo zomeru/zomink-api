@@ -35,15 +35,15 @@ export const createUserHandler = async (
     });
   } catch (error: any) {
     if (error.code === 11000) {
-      return res.json({
-        status: 11000,
+      return res.status(400).json({
+        status: 400,
         error: 'User already exists',
       });
     }
 
-    return res.json({
+    return res.status(500).json({
       status: 500,
-      error,
+      error: error.message,
     });
   }
 };
@@ -51,7 +51,7 @@ export const createUserHandler = async (
 export const getCurrentUserHandler = async (_req: Request, res: Response) => {
   const user = await findUserById(res.locals.token.userId);
   if (!user) {
-    return res.json({
+    return res.status(404).json({
       status: 404,
       error: 'User not found',
     });
