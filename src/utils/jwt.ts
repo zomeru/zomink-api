@@ -72,7 +72,7 @@ const defaultCookieOptions: CookieOptions = {
   httpOnly: process.env.NODE_ENV === 'production',
   secure: process.env.NODE_ENV === 'production',
   // sameSite: isProduction ? 'strict' : 'lax',
-  sameSite: 'lax',
+  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
   // domain: isProduction ? 'zom.ink' : '127.0.0.1',
   domain: process.env.CLIENT_URL,
   path: '/',
