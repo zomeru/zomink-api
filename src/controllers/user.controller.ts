@@ -31,7 +31,7 @@ export const createUserHandler = async (
 
     // return sendData(res, newUser, 200, 'success');
     return res.status(200).json({
-      success: true,
+      status: 200,
       message: 'User successfully created',
     });
   } catch (error: any) {
@@ -59,7 +59,7 @@ export const getCurrentUserHandler = async (_req: Request, res: Response) => {
   }
 
   return res.status(200).json({
-    success: true,
+    status: 200,
     data: {
       user,
     },
