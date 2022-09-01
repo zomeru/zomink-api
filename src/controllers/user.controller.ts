@@ -16,7 +16,7 @@ import {
 import { AppError } from '../utils/appError';
 import catchAsync from '../utils/catchAsync';
 import log from '../utils/logger';
-import sendEmail from '../utils/mailer';
+// import sendEmail from '../utils/mailer';
 
 export const createUserHandler = catchAsync(
   async (
@@ -29,17 +29,17 @@ export const createUserHandler = catchAsync(
     try {
       const user = await createUser(body);
 
-      sendEmail({
-        to: user.email,
-        subject: 'Please verify your email',
-        text: `Verification code: ${user.verificationCode}. ID: ${user._id}`,
-      })
-        .then((emailRes) => {
-          log.info(emailRes, 'Email sent');
-        })
-        .catch((err) => {
-          log.error(err, 'Error sending email');
-        });
+      // sendEmail({
+      //   to: user.email,
+      //   subject: 'Please verify your email',
+      //   text: `Verification code: ${user.verificationCode}. ID: ${user._id}`,
+      // })
+      //   .then((emailRes) => {
+      //     log.info(emailRes, 'Email sent');
+      //   })
+      //   .catch((err) => {
+      //     log.error(err, 'Error sending email');
+      //   });
 
       // return res.send('User successfully created');
 
