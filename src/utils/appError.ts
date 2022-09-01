@@ -39,16 +39,21 @@ export const SuccessType = {
   IMUsed: 226,
 };
 
+export type ErrorTypeKeys = keyof typeof ErrorType;
+export type ErrorTypeValues = typeof ErrorType[ErrorTypeKeys]; //  "
+
 export class AppError extends Error {
-  private statusCode: number;
+  error: string;
 
-  constructor(errorType: keyof typeof ErrorType, message: string) {
+  statusCode: ErrorTypeValues;
+
+  constructor(message: string, statusCode: ErrorTypeValues = 500) {
     super(message);
-    this.name = this.constructor.name;
-    this.statusCode = ErrorType[errorType];
 
-    // eslint-disable-next-line no-console
-    console.error({ errorType, message });
+    this.error = message;
+    this.statusCode = statusCode;
+
+    // Error.captureStackTrace(this, this.constructor);
   }
 
   get StatusCode() {
@@ -57,7 +62,7 @@ export class AppError extends Error {
 
   get JSON(): ErrorResponse {
     return {
-      message: this.message,
+      message: this.error,
       statusCode: this.statusCode,
     };
   }

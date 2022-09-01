@@ -2,22 +2,22 @@ import express from 'express';
 
 import validateResource from '../middlewares/validateResource';
 import {
-  createSessionHandler,
+  loginHandler,
+  logoutAllHandler,
   logoutHandler,
   refreshAccessTokenHandler,
 } from '../controllers/auth.controller';
-import { createSessionSchema } from '../schema/auth.schema';
+import { loginSchema } from '../schema/auth.schema';
+import requireUser from '../middlewares/requireUser';
 
 const router = express.Router();
 
-router.post(
-  '/session',
-  validateResource(createSessionSchema),
-  createSessionHandler
-);
+router.post('/auth/login', validateResource(loginSchema), loginHandler);
 
-router.post('/session/refresh', refreshAccessTokenHandler);
+router.post('/auth/refresh', refreshAccessTokenHandler);
 
-router.post('/session/logout', logoutHandler);
+router.post('/auth/logout', requireUser, logoutHandler);
+
+router.post('/auth/logout-all', requireUser, logoutAllHandler);
 
 export default router;

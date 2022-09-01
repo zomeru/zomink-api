@@ -1,16 +1,26 @@
 import { NextFunction, Request, Response } from 'express';
-import catchAsync from '../utils/catchAsync';
+import { NewCookies, verifyAccessToken } from '../utils/jwt';
 
-const requireUser = catchAsync(
-  async (_req: Request, res: Response, next: NextFunction) => {
-    const { user } = res.locals;
+const requireUser = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const token = verifyAccessToken(req.cookies[NewCookies.AccessToken]);
 
-    if (!user) {
-      return res.sendStatus(403);
+    if (!token) {
+      return res.json({
+        status: 401,
+        error: 'Token expired!',
+      });
     }
 
-    return next();
+    res.locals.token = token;
+
+    next();
+  } catch (error) {
+    return res.json({
+      status: 500,
+      error,
+    });
   }
-);
+};
 
 export default requireUser;
