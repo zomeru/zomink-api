@@ -41,7 +41,7 @@ async function sendEmail(payload: SendMailOptions) {
 
     const result = await transport.sendMail(mailOptions, (err, info) => {
       if (err) {
-        log.error(err, 'Error sending email');
+        log.error(err, 'res Error sending email');
       }
 
       log.info(`Preview URL: ${nodemailer.getTestMessageUrl(info)}`);
@@ -49,7 +49,7 @@ async function sendEmail(payload: SendMailOptions) {
 
     return result;
   } catch (error) {
-    log.error(error, 'Error sending email');
+    log.error(error, 'catch Error sending email');
   }
 }
 
