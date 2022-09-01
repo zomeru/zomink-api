@@ -130,12 +130,12 @@ export const forgotPasswordHandler = catchAsync(
     user.passwordResetCode = passwordResetCode;
     await user.save();
 
-    await sendEmail({
-      to: user.email,
-      from: process.env.MAILER_FROM as string,
-      subject: 'Password reset',
-      text: `Password reset code: ${passwordResetCode}, User ID: ${user._id}`,
-    });
+    // await sendEmail({
+    //   to: user.email,
+    //   from: process.env.MAILER_FROM as string,
+    //   subject: 'Password reset',
+    //   text: `Password reset code: ${passwordResetCode}, User ID: ${user._id}`,
+    // });
 
     log.debug(`Password reset code sent to ${user.email}`);
     return res.status(200).json({ message });
