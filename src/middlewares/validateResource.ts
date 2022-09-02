@@ -16,7 +16,7 @@ const validateResource =
 
       return res.json({
         status: 400,
-        error: error.message,
+        error: error.issues[0].message,
       });
     }
   };

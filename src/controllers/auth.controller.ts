@@ -50,9 +50,10 @@ export const loginHandler = async (
     // // send tokens
     return res.status(200).json({
       status: 200,
-      data: {
-        user,
-      },
+      // data: {
+      //   user:,
+      // },
+      message: 'Login successful',
     });
   } catch (error: any) {
     return res.status(500).json({

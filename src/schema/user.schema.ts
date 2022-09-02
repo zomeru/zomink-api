@@ -5,6 +5,9 @@ export const createUserSchema = object({
     username: string({
       required_error: 'Username is required',
     }).min(6, 'Username must be at least 6 characters long'),
+    email: string({
+      required_error: 'Email is required',
+    }).email('Not a valid email'),
     firstName: string({
       required_error: 'First name is required',
     }),
@@ -17,9 +20,6 @@ export const createUserSchema = object({
     passwordConfirmation: string({
       required_error: 'Password confirmation is required',
     }),
-    email: string({
-      required_error: 'Email is required',
-    }).email('Not a valid email'),
   }).refine((data) => data.password === data.passwordConfirmation, {
     message: 'Passwords do not match',
     path: ['passwordConfirmation'],

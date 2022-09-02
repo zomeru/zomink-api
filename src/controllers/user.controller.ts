@@ -1,4 +1,6 @@
 import { Request, Response } from 'express';
+import { omit } from 'lodash';
+import { privateFields } from '../models/user.model';
 // import UserModel from '../models/user.model';
 
 import {
@@ -38,7 +40,10 @@ export const createUserHandler = async (
     if (error.code === 11000) {
       return res.status(400).json({
         status: 400,
-        error: 'User already exists',
+        error: `A user with this ${
+          Object.keys(error.keyValue)[0]
+        } already exists`,
+        errorField: Object.keys(error.keyValue)[0],
       });
     }
 
@@ -61,7 +66,7 @@ export const getCurrentUserHandler = async (_req: Request, res: Response) => {
   return res.status(200).json({
     status: 200,
     data: {
-      user,
+      user: omit(user.toObject(), privateFields),
     },
   });
 };
