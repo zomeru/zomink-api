@@ -40,31 +40,31 @@ export const privateFields = [
   },
 })
 export class User {
-  @prop({ lowercase: true, required: true, unique: true })
+  @prop({ lowercase: true, required: true, unique: true, type: String })
   username: string;
 
-  @prop({ lowercase: true, required: true, unique: true })
+  @prop({ lowercase: true, required: true, unique: true, type: String })
   email: string;
 
-  @prop({ required: true })
+  @prop({ required: true, type: String })
   firstName: string;
 
-  @prop({ required: true })
+  @prop({ required: true, type: String })
   lastName: string;
 
-  @prop({ required: true })
+  @prop({ required: true, type: String })
   password: string;
 
-  @prop({ default: 0 })
+  @prop({ default: 0, type: Number })
   tokenVersion: number;
 
-  @prop({ required: true, default: () => nanoid() })
+  @prop({ required: true, default: () => nanoid(), type: String })
   verificationCode: string;
 
-  @prop()
+  @prop({ type: String })
   passwordResetCode: string | null;
 
-  @prop({ default: false })
+  @prop({ default: false, type: Boolean })
   verified: boolean;
 
   async validatePassword(this: DocumentType<User>, candidate: string) {

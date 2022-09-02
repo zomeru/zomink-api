@@ -2,9 +2,8 @@
 import { DocumentType } from '@typegoose/typegoose';
 import { CookieOptions, Response } from 'express';
 import jwt from 'jsonwebtoken';
+
 import { User } from '../models/user.model';
-// import { CreateUserInput } from '../schema/user.schema';
-// import { NewUserDocument } from '../services/newUserService';
 
 export interface AccessTokenPayload {
   userId: string;
@@ -30,17 +29,14 @@ export enum TokenExpiration {
   RefreshIfLessThan = 4 * 24 * 60 * 60,
 }
 
-// const accessTokenSecret = process.env.ACCESS_TOKEN_PUBLIC_KEY as string;
-// const refreshTokenSecret = process.env.REFRESH_TOKEN_PUBLIC_KEY as string;
-
 function signAccessToken(payload: AccessTokenPayload) {
-  return jwt.sign(payload, process.env.ACCESS_TOKEN_PUBLIC_KEY as string, {
+  return jwt.sign(payload, process.env.ACCESS_SECRET_KEY as string, {
     expiresIn: TokenExpiration.Access,
   });
 }
 
 function signRefreshToken(payload: RefreshTokenPayload) {
-  return jwt.sign(payload, process.env.REFRESH_TOKEN_PUBLIC_KEY as string, {
+  return jwt.sign(payload, process.env.REFRESH_SECRET_KET as string, {
     expiresIn: TokenExpiration.Refresh,
   });
 }
@@ -72,7 +68,7 @@ const defaultCookieOptions: CookieOptions = {
   httpOnly: process.env.NODE_ENV === 'production',
   secure: process.env.NODE_ENV === 'production',
   sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-  domain: process.env.CLIENT_URL,
+  domain: process.env.CLIENT_ORIGIN,
   path: '/',
 };
 
@@ -95,7 +91,7 @@ export function setTokens(res: Response, access: string, refresh?: string) {
 export function verifyRefreshToken(token: string) {
   return jwt.verify(
     token,
-    process.env.REFRESH_TOKEN_PUBLIC_KEY as string
+    process.env.REFRESH_SECRET_KET as string
   ) as RefreshToken;
 }
 
@@ -103,7 +99,7 @@ export function verifyAccessToken(token: string) {
   try {
     return jwt.verify(
       token,
-      process.env.ACCESS_TOKEN_PUBLIC_KEY as string
+      process.env.ACCESS_SECRET_KEY as string
     ) as AccessToken;
   } catch (error) {
     return null;
