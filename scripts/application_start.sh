@@ -19,4 +19,4 @@ npm ci || npm install
 npm run build
 
 #start our node app in the background
-node dist/app.js > app.out.log 2> app.err.log < /dev/null & 
+npm run start > app.out.log 2> app.err.log < /dev/null & 
