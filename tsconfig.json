@@ -30,5 +30,6 @@
       "./src/@types",
       "./src/utils/extensions.d.ts"
     ]
-  }
+  },
+  "exclude": ["scripts"]
 }

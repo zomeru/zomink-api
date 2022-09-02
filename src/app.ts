@@ -18,7 +18,7 @@ app.use(helmet());
 
 app.use(
   cors({
-    origin: process.env.CLIENT_URL as string,
+    origin: process.env.CLIENT_ORIGIN as string,
     credentials: true,
     optionsSuccessStatus: 200,
     allowedHeaders: [
@@ -44,18 +44,23 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
+app.get('/', (_req, res) => {
+  res.send('Hello World!');
+});
+
 app.use(router);
 
 app.use((_req: Request, res: Response) => {
-  res.redirect(process.env.CLIENT_URL as string);
+  res.redirect(process.env.CLIENT_ORIGIN as string);
 });
 
-const { PORT } = process.env;
+const PORT = Number(process.env.PORT);
 
 app.listen(PORT, () => {
   if (process.env.NODE_ENV !== 'production') {
-    log.info(`Server started at http://localhost:${PORT || 8000}`);
+    log.info(PORT, typeof PORT);
+    log.info(`Server started at http://localhost:${PORT}`);
   }
 
-  connectToDb();
+  connectToDb().catch((err) => log.error(err));
 });
