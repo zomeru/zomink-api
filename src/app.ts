@@ -13,24 +13,36 @@ dotenv.config();
 
 const app = express();
 
+app.use(cookieParser());
+app.use(helmet());
+
 app.use(
   cors({
     origin: process.env.CLIENT_URL as string,
     credentials: true,
+    optionsSuccessStatus: 200,
+    allowedHeaders: [
+      'Content-Type',
+      'Accept',
+      'Origin',
+      'X-Requested-With',
+      'Authorization',
+      'Set-Cookie',
+    ],
   })
 );
 
-app.use(cookieParser());
-
-app.use(helmet());
-
-if (process.env.NODE_ENV === 'development') {
-  app.use(morgan('dev'));
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
 }
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
+
+if (process.env.NODE_ENV === 'development') {
+  app.use(morgan('dev'));
+}
 
 app.use(router);
 
