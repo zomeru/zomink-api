@@ -41,10 +41,10 @@ export const privateFields = [
 })
 export class User {
   @prop({ lowercase: true, required: true, unique: true })
-  email: string;
+  username: string;
 
   @prop({ lowercase: true, required: true, unique: true })
-  username: string;
+  email: string;
 
   @prop({ required: true })
   firstName: string;
@@ -69,6 +69,7 @@ export class User {
 
   async validatePassword(this: DocumentType<User>, candidate: string) {
     try {
+      log.debug(`Validating password for user ${this.username}`);
       return await argon2.verify(this.password, candidate);
     } catch (error) {
       log.error(error, 'Could not validate password.');
