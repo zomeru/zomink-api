@@ -4,6 +4,7 @@ import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import helmet from 'helmet';
+import path from 'path';
 
 import connectToDb from './utils/connectToDb';
 import log from './utils/logger';
@@ -38,7 +39,6 @@ if (process.env.NODE_ENV === 'production') {
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-app.use(express.static('public'));
 
 if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
