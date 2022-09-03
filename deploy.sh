@@ -3,4 +3,4 @@
 git pull origin main
 
 echo "Building server"
-docker compose up -d --build
+docker compose up --build
