@@ -1,0 +1,14 @@
+version: '3.9'
+services:
+  zomink-server:
+    restart: always
+    container_name: zomink-server
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+    build:
+      context: ./
+    image: zomink-server
+    ports:
+      - 8000:8000

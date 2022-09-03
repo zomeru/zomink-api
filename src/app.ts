@@ -44,7 +44,7 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
-app.get('/', (_req, res) => {
+app.get('/zoms', (_req, res) => {
   res.send('Hello World!');
 });
 

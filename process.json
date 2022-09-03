@@ -1,0 +1,14 @@
+{
+  "apps": [
+    {
+      "name": "zomink-server",
+      "script": "dist/app.js",
+      "watch": false,
+      "instances": "max",
+      "exec_mode": "cluster",
+      "env": {
+        "NODE_ENV": "production"
+      }
+    }
+  ]
+}

@@ -13,3 +13,4 @@ log/access.log
 # cache
 .cache/
 .eslintcache
+.vercel

@@ -1,21 +1,24 @@
-FROM public.ecr.aws/bitnami/node:15
-COPY --from=public.ecr.aws/tinystacks/secret-env-vars-wrapper:latest-x86 /opt /opt
-COPY --from=public.ecr.aws/awsguru/aws-lambda-adapter:0.3.2-x86_64 /lambda-adapter /opt/extensions/lambda-adapter
+FROM node:14-alpine
 
-# Create app directory
-WORKDIR /usr/src/app
+ADD package.json /tmp/package.json
 
-# Install app dependencies
-# A wildcard is used to ensure both package.json AND package-lock.json are copied
-# where available (npm@5+)
-COPY package*.json ./
-COPY tsconfig.json ./
-COPY src ./src
-RUN npm install
-RUN npm run build
+RUN rm -rf dist
 
-# Bundle app source
-COPY . .
+RUN cd /tmp && npm install -q
+
+RUN npm dedupe
+
+# Code base
+ADD ./ /src
+RUN rm -rf /src/node_modules && cp -a /tmp/node_modules /src/
+
+# Define working directory
+WORKDIR /src
+
+RUN npm run-script build
+
+RUN npm install pm2 -g
 
 EXPOSE 8000
-CMD [ "/opt/tinystacks-secret-env-vars-wrapper", "node", "dist/app.js" ]
+
+CMD ["pm2-runtime", "process.json"]
