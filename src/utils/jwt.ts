@@ -36,7 +36,7 @@ function signAccessToken(payload: AccessTokenPayload) {
 }
 
 function signRefreshToken(payload: RefreshTokenPayload) {
-  return jwt.sign(payload, process.env.REFRESH_SECRET_KET as string, {
+  return jwt.sign(payload, process.env.REFRESH_SECRET_KEY as string, {
     expiresIn: TokenExpiration.Refresh,
   });
 }
@@ -90,7 +90,7 @@ export function setTokens(res: Response, access: string, refresh?: string) {
 export function verifyRefreshToken(token: string) {
   return jwt.verify(
     token,
-    process.env.REFRESH_SECRET_KET as string
+    process.env.REFRESH_SECRET_KEY as string
   ) as RefreshToken;
 }
 
