@@ -4,7 +4,6 @@ import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import helmet from 'helmet';
-import path from 'path';
 
 import connectToDb from './utils/connectToDb';
 import log from './utils/logger';
