@@ -17,7 +17,8 @@ export const privateFields = [
   '__v',
   'verificationCode',
   'passwordResetCode',
-  // "verified",
+  'verified',
+  'tokenVersion',
 ];
 
 @pre<User>('save', async function () {
