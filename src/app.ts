@@ -34,15 +34,11 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
-app.get('/test', (_req, res) => {
-  res.send('Hello World!');
+app.get('/', (_req, res) => {
+  res.send('Zomink API');
 });
 
 app.use(router);
-
-app.use((_req: Request, res: Response) => {
-  res.redirect(process.env.CLIENT_ORIGIN as string);
-});
 
 const PORT = Number(process.env.PORT);
 
