@@ -9,7 +9,8 @@
     "format": "prettier --write ./src",
     "lint": "eslint --ext .ts,.js ./src",
     "prepare": "husky install",
-    "start": "node dist/app.js"
+    "start": "node dist/app.js",
+    "deploy": "chmod +x ./deploy.sh && ./deploy.sh"
   },
   "dependencies": {
     "@typegoose/typegoose": "^9.11.2",
