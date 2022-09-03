@@ -13,24 +13,15 @@ dotenv.config();
 
 const app = express();
 
-app.use(cookieParser());
-app.use(helmet());
-
 app.use(
   cors({
     origin: process.env.CLIENT_ORIGIN as string,
     credentials: true,
-    optionsSuccessStatus: 200,
-    allowedHeaders: [
-      'Content-Type',
-      'Accept',
-      'Origin',
-      'X-Requested-With',
-      'Authorization',
-      'Set-Cookie',
-    ],
   })
 );
+
+app.use(cookieParser());
+app.use(helmet());
 
 if (process.env.NODE_ENV === 'production') {
   app.set('trust proxy', 1);
@@ -43,7 +34,7 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('dev'));
 }
 
-app.get('/zoms', (_req, res) => {
+app.get('/test', (_req, res) => {
   res.send('Hello World!');
 });
 

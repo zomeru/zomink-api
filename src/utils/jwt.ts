@@ -67,8 +67,7 @@ export enum NewCookies {
 const defaultCookieOptions: CookieOptions = {
   httpOnly: process.env.NODE_ENV === 'production',
   secure: process.env.NODE_ENV === 'production',
-  sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
-  domain: process.env.CLIENT_ORIGIN,
+  sameSite: 'lax',
   path: '/',
 };
 
