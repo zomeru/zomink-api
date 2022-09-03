@@ -3,7 +3,6 @@ import mongoose from 'mongoose';
 import log from './logger';
 
 async function connectToDb() {
-  console.log(process.env.MONGO_URI);
   await mongoose.connect(process.env.MONGO_URI as string);
   log.info('Connected to MongoDB');
 }

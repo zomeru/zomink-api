@@ -1,0 +1,5 @@
+api.zom.ink {
+  reverse_prox zomink-server:8000 {
+    header_down Strict-Transport-Security max-age=31536000;
+  }
+}
