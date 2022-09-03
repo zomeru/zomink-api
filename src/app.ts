@@ -40,10 +40,6 @@ app.get('/test', (_req, res) => {
 
 app.use(router);
 
-app.use((_req: Request, res: Response) => {
-  res.redirect(process.env.CLIENT_ORIGIN as string);
-});
-
 const PORT = Number(process.env.PORT);
 
 app.listen(PORT, () => {
