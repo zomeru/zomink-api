@@ -8,7 +8,7 @@ const requireUser = async (req: Request, res: Response, next: NextFunction) => {
     if (!token) {
       return res.json({
         status: 401,
-        error: 'Token expired!',
+        error: 'Unauthorized user. Please login',
       });
     }
 
