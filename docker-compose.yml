@@ -12,7 +12,6 @@ services:
     image: zomink-server
     ports:
       - 8000:8000
-
   caddy:
     image: caddy/caddy:2.2.1-alpine
     container_name: caddy-service
@@ -21,7 +20,7 @@ services:
       - '80:80'
       - '443:443'
     volumes:
-      - $PWD/server/Caddyfile:/etc/caddy/Caddyfile
+      - $PWD/server/Caddyfile:/root/zomink-server/server/Caddyfile
       - $PWD/server/site:/srv
       - caddy_data:/data
       - caddy_config:/config
