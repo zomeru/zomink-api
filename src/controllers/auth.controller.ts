@@ -50,10 +50,9 @@ export const loginHandler = async (
     // // send tokens
     return res.status(200).json({
       status: 200,
-      // data: {
-      //   user:,
-      // },
-      message: 'Login successful',
+      data: {
+        message: 'Login successful',
+      },
     });
   } catch (error: any) {
     return res.status(500).json({
@@ -95,7 +94,9 @@ export const logoutHandler = async (_req: Request, res: Response) => {
   clearTokens(res);
   return res.json({
     status: 200,
-    message: 'Logged out successfully',
+    data: {
+      message: 'Logged out successfully',
+    },
   });
 };
 
@@ -105,6 +106,8 @@ export const logoutAllHandler = async (_req: Request, res: Response) => {
   clearTokens(res);
   return res.status(200).json({
     status: 200,
-    message: 'Logged out all devices successfully',
+    data: {
+      message: 'Logged out all devices successfully',
+    },
   });
 };

@@ -31,10 +31,11 @@ export const createUserHandler = async (
     const { accessToken, refreshToken } = buildTokens(user);
     setTokens(res, accessToken, refreshToken);
 
-    // return sendData(res, newUser, 200, 'success');
     return res.status(200).json({
       status: 200,
-      message: 'User successfully created',
+      data: {
+        message: 'User created successfully',
+      },
     });
   } catch (error: any) {
     if (error.code === 11000) {
