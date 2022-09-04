@@ -17,8 +17,8 @@ router.post(
   createShortURLHandler
 );
 
-router.get('/urls/:alias', validateResource(getShortURLSchema), getShortURL);
+router.get('/:alias/urls', validateResource(getShortURLSchema), getShortURL);
 
-router.get('/urls/get-user-urls', requireUser, getUserUrls);
+router.get('/urls/user', requireUser, getUserUrls);
 
 export default router;

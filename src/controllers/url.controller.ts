@@ -7,7 +7,7 @@ import {
   findUrlByAlias,
   findUrlByLink,
   findUrlByUserAndLink,
-  getAllUrlsByUserId,
+  findUrlsByUserId,
 } from '../services/url.service';
 import {
   AppError,
@@ -34,7 +34,7 @@ export const createShortURLHandler = async (
     }
 
     if (body.alias) {
-      const newAlias = body.alias.toLowerCase().trim();
+      const newAlias = body.alias.trim();
 
       const existingAlias = await findUrlByAlias(newAlias);
 
@@ -116,15 +116,23 @@ export const getUserUrls = async (
   res: Response,
   next: NextFunction
 ) => {
-  const user = res.locals.token.userId;
-
   try {
-    const urls = await getAllUrlsByUserId(user);
+    // const user = await findUrlsByUserId(res.locals.token.userId);
+
+    console.log(res.locals.token.userId);
+
+    const urls = await findUrlsByUserId(res.locals.token.userId);
+
+    if (!urls) {
+      return next(new AppError('No urls found', ErrorType.NotFoundException));
+    }
+
+    console.log('urls', urls);
 
     return res.status(SuccessType.OK).json({
       status: StatusType.Success,
       data: {
-        urls: urls.map((url) => omit(url.toObject(), ['__v'])),
+        urlData: urls.map((url) => omit(url.toObject(), ['__v'])),
       },
     });
   } catch (error: any) {

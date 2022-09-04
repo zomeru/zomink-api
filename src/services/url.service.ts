@@ -10,7 +10,7 @@ export function findUrlByLink(link: string) {
 }
 
 export function findUrlByAlias(alias: string) {
-  return URLModel.findOne({ alias });
+  return URLModel.findOne({ alias: { $regex: new RegExp(`^${alias}$`, 'i') } });
 }
 
 export function findUrlByUserAndLink(user: string, link: string) {
@@ -21,6 +21,6 @@ export function findUrlsByUserId(id: string) {
   return URLModel.find({ user: id });
 }
 
-export function getAllUrlsByUserId(id: string) {
-  return URLModel.find({ user: id });
-}
+// export function getAllUrlsByUserId(id: string) {
+//   return URLModel.find({ user: id });
+// }
