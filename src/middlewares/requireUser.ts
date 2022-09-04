@@ -1,4 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
+import { AppError, ErrorType } from '../utils/appError';
 import { NewCookies, verifyAccessToken } from '../utils/jwt';
 
 const requireUser = async (req: Request, res: Response, next: NextFunction) => {
@@ -6,20 +7,15 @@ const requireUser = async (req: Request, res: Response, next: NextFunction) => {
     const token = verifyAccessToken(req.cookies[NewCookies.AccessToken]);
 
     if (!token) {
-      return res.json({
-        status: 401,
-        error: 'Unauthorized user. Please login',
-      });
+      return next(
+        new AppError('Unauthorized user', ErrorType.UnauthorizedException)
+      );
     }
 
     res.locals.token = token;
-
     next();
-  } catch (error) {
-    return res.json({
-      status: 500,
-      error,
-    });
+  } catch (error: any) {
+    return next(new AppError(error, ErrorType.BadRequestException));
   }
 };
 

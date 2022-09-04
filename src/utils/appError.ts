@@ -51,7 +51,7 @@ export type SuccessTypeValues = typeof SuccessType[keyof typeof SuccessType]; //
 export class AppError extends Error {
   statusCode: ErrorTypeValues;
 
-  status: boolean;
+  status: string;
 
   constructor(
     message: string,
@@ -60,7 +60,9 @@ export class AppError extends Error {
     super(message);
 
     this.statusCode = statusCode;
-    this.status = `${statusCode}`.startsWith('4');
+    this.status = `${statusCode}`.startsWith('4')
+      ? StatusType.Error
+      : StatusType.Success;
 
     Error.captureStackTrace(this, this.constructor);
   }
