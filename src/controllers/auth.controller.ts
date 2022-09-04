@@ -1,10 +1,10 @@
 import { NextFunction, Request, Response } from 'express';
 import { omit } from 'lodash';
+
 import { privateFields } from '../models/user.model';
 
 import { LoginInput } from '../schema/auth.schema';
 import { increaseTokenVersion } from '../services/auth.service';
-
 import {
   findUserById,
   findUserByEmailOrUsername,
@@ -15,7 +15,6 @@ import {
   SuccessType,
   StatusType,
 } from '../utils/appError';
-
 import {
   buildTokens,
   clearTokens,

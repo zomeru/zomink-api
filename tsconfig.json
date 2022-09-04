@@ -1,6 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/tsconfig",
-  "display": "Node 14",
+  "display": "Node 16",
   "compilerOptions": {
     "moduleResolution": "node",
     "incremental": true,
@@ -31,5 +31,6 @@
       "./src/utils/extensions.d.ts"
     ]
   },
+  "include": ["./src/**/*"],
   "exclude": ["scripts"]
 }

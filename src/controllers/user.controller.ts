@@ -1,21 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
 import { omit } from 'lodash';
-import { privateFields } from '../models/user.model';
-// import UserModel from '../models/user.model';
 
-import {
-  CreateUserInput,
-  // ForgotPasswordInput,
-  // ResetPasswordInput,
-  // VerifyUserInput,
-} from '../schema/user.schema';
-import {
-  createUser,
-  findUserById,
-  // findUserByEmail,
-  // findUserByEmailOrUsername,
-  // findUserById,
-} from '../services/user.service';
+import { privateFields } from '../models/user.model';
+import { CreateUserInput } from '../schema/user.schema';
+import { createUser, findUserById } from '../services/user.service';
 import {
   AppError,
   ErrorType,
@@ -66,6 +54,7 @@ export const getCurrentUserHandler = async (
   next: NextFunction
 ) => {
   const user = await findUserById(res.locals.token.userId);
+
   if (!user) {
     return next(new AppError('User not found', ErrorType.NotFoundException));
   }

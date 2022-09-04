@@ -67,29 +67,3 @@ export class AppError extends Error {
     Error.captureStackTrace(this, this.constructor);
   }
 }
-
-// export class AppError extends Error {
-//   error: string;
-
-//   statusCode: ErrorTypeValues;
-
-//   constructor(statusCode: ErrorTypeValues, message: string) {
-//     super(message);
-
-//     this.error = message;
-//     this.statusCode = statusCode;
-
-//     // Error.captureStackTrace(this, this.constructor);
-//   }
-
-//   get StatusCode() {
-//     return this.statusCode;
-//   }
-
-//   get JSON(): ErrorResponse {
-//     return {
-//       message: this.error,
-//       statusCode: this.statusCode,
-//     };
-//   }
-// }

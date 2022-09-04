@@ -6,6 +6,7 @@ import {
   index,
   Ref,
 } from '@typegoose/typegoose';
+
 import { User } from './user.model';
 
 export const privateFields = ['__v'];
