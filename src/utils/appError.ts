@@ -21,9 +21,9 @@ export const ErrorType = {
   PreconditionFailedException: 412,
 };
 
-export type ErrorResponse = {
-  statusCode: number;
-  message: string;
+export const StatusType = {
+  Success: 'success',
+  Error: 'error',
 };
 
 export const SuccessType = {
@@ -39,31 +39,55 @@ export const SuccessType = {
   IMUsed: 226,
 };
 
+export type ErrorResponse = {
+  statusCode: number;
+  message: string;
+};
+
 export type ErrorTypeKeys = keyof typeof ErrorType;
 export type ErrorTypeValues = typeof ErrorType[ErrorTypeKeys]; //  "
+export type SuccessTypeValues = typeof SuccessType[keyof typeof SuccessType]; //  "
 
 export class AppError extends Error {
-  error: string;
-
   statusCode: ErrorTypeValues;
 
-  constructor(message: string, statusCode: ErrorTypeValues = 500) {
+  status: boolean;
+
+  constructor(
+    message: string,
+    statusCode: ErrorTypeValues | SuccessTypeValues
+  ) {
     super(message);
 
-    this.error = message;
     this.statusCode = statusCode;
+    this.status = `${statusCode}`.startsWith('4');
 
-    // Error.captureStackTrace(this, this.constructor);
-  }
-
-  get StatusCode() {
-    return this.statusCode;
-  }
-
-  get JSON(): ErrorResponse {
-    return {
-      message: this.error,
-      statusCode: this.statusCode,
-    };
+    Error.captureStackTrace(this, this.constructor);
   }
 }
+
+// export class AppError extends Error {
+//   error: string;
+
+//   statusCode: ErrorTypeValues;
+
+//   constructor(statusCode: ErrorTypeValues, message: string) {
+//     super(message);
+
+//     this.error = message;
+//     this.statusCode = statusCode;
+
+//     // Error.captureStackTrace(this, this.constructor);
+//   }
+
+//   get StatusCode() {
+//     return this.statusCode;
+//   }
+
+//   get JSON(): ErrorResponse {
+//     return {
+//       message: this.error,
+//       statusCode: this.statusCode,
+//     };
+//   }
+// }

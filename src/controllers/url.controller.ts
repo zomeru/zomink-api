@@ -1,7 +1,7 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { omit } from 'lodash';
 
-import { CreateShortURLInput, RedirectToLinkInput } from '../schema/url.schema';
+import { CreateShortURLInput, GetShortURLInput } from '../schema/url.schema';
 import {
   createShortURL,
   findUrlByAlias,
@@ -9,12 +9,19 @@ import {
   findUrlByUserAndLink,
   getAllUrlsByUserId,
 } from '../services/url.service';
+import {
+  AppError,
+  ErrorType,
+  StatusType,
+  SuccessType,
+} from '../utils/appError';
 import { aliasValid, linkValid } from '../utils/regEx';
 import { aliasGen } from '../utils/urls';
 
 export const createShortURLHandler = async (
   req: Request<{}, {}, CreateShortURLInput>,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
   const { body } = req;
 
@@ -23,10 +30,7 @@ export const createShortURLHandler = async (
     const link = body.link.trim();
 
     if (!linkValid(link)) {
-      return res.status(400).json({
-        status: 400,
-        error: 'Invalid link',
-      });
+      return next(new AppError('Invalid link', ErrorType.BadRequestException));
     }
 
     if (body.alias) {
@@ -35,16 +39,14 @@ export const createShortURLHandler = async (
       const existingAlias = await findUrlByAlias(newAlias);
 
       if (existingAlias) {
-        return res.status(400).json({
-          status: 400,
-          error: 'Alias already taken',
-        });
+        return next(
+          new AppError('Alias already taken', ErrorType.BadRequestException)
+        );
       }
       if (!aliasValid(newAlias)) {
-        return res.status(400).json({
-          status: 400,
-          error: 'Invalid alias',
-        });
+        return next(
+          new AppError('Invalid alias', ErrorType.BadRequestException)
+        );
       }
 
       alias = newAlias;
@@ -54,8 +56,8 @@ export const createShortURLHandler = async (
       const existingUrlWithUser = await findUrlByUserAndLink(body.user, link);
 
       if (existingUrlWithUser) {
-        return res.status(200).json({
-          status: 200,
+        return res.status(SuccessType.OK).json({
+          status: StatusType.Success,
           data: {
             urlData: omit(existingUrlWithUser.toObject(), ['__v']),
           },
@@ -67,8 +69,8 @@ export const createShortURLHandler = async (
       const shortUrlWithoutUser = await findUrlByLink(link);
 
       if (shortUrlWithoutUser && !shortUrlWithoutUser.user) {
-        return res.status(200).json({
-          status: 200,
+        return res.status(SuccessType.OK).json({
+          status: StatusType.Success,
           data: {
             urlData: omit(shortUrlWithoutUser.toObject(), ['__v']),
           },
@@ -96,43 +98,46 @@ export const createShortURLHandler = async (
 
     const shortUrl = await createShortURL(newOjb);
 
-    return res.status(200).json({
-      status: 200,
+    return res.status(SuccessType.Created).json({
+      status: StatusType.Success,
       data: {
         urlData: omit(shortUrl.toObject(), ['__v']),
       },
     });
   } catch (error: any) {
-    return res.status(500).json({
-      status: 500,
-      error: error.message,
-    });
+    return next(
+      new AppError(error.message, ErrorType.InternalServerErrorException)
+    );
   }
 };
 
-export const getUserUrls = async (_req: Request, res: Response) => {
+export const getUserUrls = async (
+  _req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const user = res.locals.token.userId;
 
   try {
     const urls = await getAllUrlsByUserId(user);
 
-    return res.status(200).json({
-      status: 200,
+    return res.status(SuccessType.OK).json({
+      status: StatusType.Success,
       data: {
         urls: urls.map((url) => omit(url.toObject(), ['__v'])),
       },
     });
   } catch (error: any) {
-    return res.status(500).json({
-      status: 500,
-      error: error.message,
-    });
+    return next(
+      new AppError(error.message, ErrorType.InternalServerErrorException)
+    );
   }
 };
 
-export const redirectToLinkHandler = async (
-  req: Request<RedirectToLinkInput>,
-  res: Response
+export const getShortURL = async (
+  req: Request<GetShortURLInput>,
+  res: Response,
+  next: NextFunction
 ) => {
   const { alias } = req.params;
 
@@ -140,20 +145,16 @@ export const redirectToLinkHandler = async (
     const url = await findUrlByAlias(alias);
 
     if (!url) {
-      return res.status(404).json({
-        status: 404,
-        error: 'Url not found',
-      });
+      return next(new AppError('Url not found', ErrorType.NotFoundException));
     }
 
-    return res.status(200).json({
-      status: 200,
+    return res.status(SuccessType.OK).json({
+      status: StatusType.Success,
       link: url.link,
     });
   } catch (error: any) {
-    return res.status(500).json({
-      status: 500,
-      error: error.message,
-    });
+    return next(
+      new AppError(error.message, ErrorType.InternalServerErrorException)
+    );
   }
 };

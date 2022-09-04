@@ -14,7 +14,7 @@ export const createShortURLSchema = object({
   }),
 });
 
-export const redirectToLinkSchema = object({
+export const getShortURLSchema = object({
   params: object({
     alias: string({
       required_error: 'Link not found',
@@ -27,4 +27,4 @@ export const redirectToLinkSchema = object({
 
 export type CreateShortURLInput = TypeOf<typeof createShortURLSchema>['body'];
 
-export type RedirectToLinkInput = TypeOf<typeof redirectToLinkSchema>['params'];
+export type GetShortURLInput = TypeOf<typeof getShortURLSchema>['params'];

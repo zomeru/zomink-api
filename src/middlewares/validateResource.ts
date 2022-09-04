@@ -1,5 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { AnyZodObject } from 'zod';
+import { AppError } from '../utils/appError';
 
 const validateResource =
   (schema: AnyZodObject) =>
@@ -12,12 +13,9 @@ const validateResource =
       });
       next();
     } catch (error: any) {
-      // return res.status(400).send(error.errors);
+      // console.log('error va', error);
 
-      return res.json({
-        status: 400,
-        error: error.issues[0].message,
-      });
+      return next(new AppError(error.issues[0].message, 400));
     }
   };
 
