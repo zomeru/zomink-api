@@ -1,4 +1,4 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { omit } from 'lodash';
 import { privateFields } from '../models/user.model';
 // import UserModel from '../models/user.model';
@@ -16,12 +16,19 @@ import {
   // findUserByEmailOrUsername,
   // findUserById,
 } from '../services/user.service';
+import {
+  AppError,
+  ErrorType,
+  SuccessType,
+  StatusType,
+} from '../utils/appError';
 
 import { buildTokens, setTokens } from '../utils/jwt';
 
 export const createUserHandler = async (
   req: Request<{}, {}, CreateUserInput>,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
   const { body } = req;
 
@@ -31,41 +38,40 @@ export const createUserHandler = async (
     const { accessToken, refreshToken } = buildTokens(user);
     setTokens(res, accessToken, refreshToken);
 
-    return res.status(200).json({
-      status: 200,
+    return res.status(SuccessType.Created).json({
+      status: StatusType.Success,
       data: {
-        message: 'User created successfully',
+        user: omit(user.toJSON(), privateFields),
       },
     });
   } catch (error: any) {
     if (error.code === 11000) {
-      return res.status(400).json({
-        status: 400,
-        error: `A user with this ${
-          Object.keys(error.keyValue)[0]
-        } already exists`,
-        errorField: Object.keys(error.keyValue)[0],
-      });
+      return next(
+        new AppError(
+          `A user with this ${Object.keys(error.keyValue)[0]} already exists`,
+          ErrorType.BadRequestException
+        )
+      );
     }
 
-    return res.status(500).json({
-      status: 500,
-      error: error.message,
-    });
+    return next(
+      new AppError(error.message, ErrorType.InternalServerErrorException)
+    );
   }
 };
 
-export const getCurrentUserHandler = async (_req: Request, res: Response) => {
+export const getCurrentUserHandler = async (
+  _req: Request,
+  res: Response,
+  next: NextFunction
+) => {
   const user = await findUserById(res.locals.token.userId);
   if (!user) {
-    return res.status(404).json({
-      status: 404,
-      error: 'User not found',
-    });
+    return next(new AppError('User not found', ErrorType.NotFoundException));
   }
 
-  return res.status(200).json({
-    status: 200,
+  return res.status(SuccessType.OK).json({
+    status: StatusType.Success,
     data: {
       user: omit(user.toObject(), privateFields),
     },

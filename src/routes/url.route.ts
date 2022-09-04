@@ -2,15 +2,12 @@ import express from 'express';
 
 import {
   createShortURLHandler,
+  getShortURL,
   getUserUrls,
-  redirectToLinkHandler,
 } from '../controllers/url.controller';
 import requireUser from '../middlewares/requireUser';
 import validateResource from '../middlewares/validateResource';
-import {
-  createShortURLSchema,
-  redirectToLinkSchema,
-} from '../schema/url.schema';
+import { createShortURLSchema, getShortURLSchema } from '../schema/url.schema';
 
 const router = express.Router();
 
@@ -20,11 +17,7 @@ router.post(
   createShortURLHandler
 );
 
-router.get(
-  '/urls/:alias',
-  validateResource(redirectToLinkSchema),
-  redirectToLinkHandler
-);
+router.get('/urls/:alias', validateResource(getShortURLSchema), getShortURL);
 
 router.get('/urls/get-user-urls', requireUser, getUserUrls);
 

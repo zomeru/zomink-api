@@ -8,6 +8,7 @@ import helmet from 'helmet';
 import connectToDb from './utils/connectToDb';
 import log from './utils/logger';
 import router from './routes';
+import { globalErrorHandler } from './controllers/error.controller';
 
 dotenv.config();
 
@@ -36,6 +37,8 @@ if (process.env.NODE_ENV === 'development') {
 }
 
 app.use(router);
+
+app.use(globalErrorHandler);
 
 const PORT = Number(process.env.PORT);
 

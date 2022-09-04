@@ -1,4 +1,6 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
+import { omit } from 'lodash';
+import { privateFields } from '../models/user.model';
 
 import { LoginInput } from '../schema/auth.schema';
 import { increaseTokenVersion } from '../services/auth.service';
@@ -7,6 +9,12 @@ import {
   findUserById,
   findUserByEmailOrUsername,
 } from '../services/user.service';
+import {
+  AppError,
+  ErrorType,
+  SuccessType,
+  StatusType,
+} from '../utils/appError';
 
 import {
   buildTokens,
@@ -19,7 +27,8 @@ import {
 
 export const loginHandler = async (
   req: Request<{}, {}, LoginInput>,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
   try {
     const errorMessage = 'Invalid email or password';
@@ -29,51 +38,43 @@ export const loginHandler = async (
     const user = await findUserByEmailOrUsername(email.toLowerCase());
 
     if (!user) {
-      return res.status(401).json({
-        status: 401,
-        error: errorMessage,
-      });
+      return next(new AppError(errorMessage, ErrorType.UnauthorizedException));
     }
 
     const isValidPassword = await user.validatePassword(password);
 
     if (!isValidPassword) {
-      return res.status(401).json({
-        status: 401,
-        error: errorMessage,
-      });
+      return next(new AppError(errorMessage, ErrorType.UnauthorizedException));
     }
 
     const { accessToken, refreshToken } = buildTokens(user);
     setTokens(res, accessToken, refreshToken);
 
-    // // send tokens
-    return res.status(200).json({
-      status: 200,
+    return res.status(SuccessType.OK).json({
+      status: StatusType.Success,
       data: {
-        message: 'Login successful',
+        user: omit(user.toJSON(), privateFields),
       },
     });
   } catch (error: any) {
-    return res.status(500).json({
-      status: 500,
-      error: error.message,
-    });
+    return next(
+      new AppError(error.message, ErrorType.InternalServerErrorException)
+    );
   }
 };
 
 export const refreshAccessTokenHandler = async (
   req: Request,
-  res: Response
+  res: Response,
+  next: NextFunction
 ) => {
+  const errorMessage = 'Unauthorized user';
+
   try {
     const current = verifyRefreshToken(req.cookies[NewCookies.RefreshToken]);
     const user = await findUserById(current.userId);
     if (!user) {
-      return res.json({
-        status: 400,
-        error: 'Invalid refresh token',
-      });
+      return next(new AppError(errorMessage, ErrorType.BadRequestException));
     }
 
     const { accessToken, refreshToken } = refreshTokens(
@@ -83,17 +84,14 @@ export const refreshAccessTokenHandler = async (
     setTokens(res, accessToken, refreshToken);
   } catch (error: any) {
     clearTokens(res);
-    return res.json({
-      status: 500,
-      error: 'Invalid refresh token',
-    });
+    return next(new AppError(errorMessage, ErrorType.BadRequestException));
   }
 };
 
 export const logoutHandler = async (_req: Request, res: Response) => {
   clearTokens(res);
-  return res.json({
-    status: 200,
+  return res.status(SuccessType.OK).json({
+    status: SuccessType.OK,
     data: {
       message: 'Logged out successfully',
     },
@@ -104,8 +102,8 @@ export const logoutAllHandler = async (_req: Request, res: Response) => {
   await increaseTokenVersion(res.locals.token.userId);
 
   clearTokens(res);
-  return res.status(200).json({
-    status: 200,
+  return res.status(SuccessType.OK).json({
+    status: SuccessType.OK,
     data: {
       message: 'Logged out all devices successfully',
     },
