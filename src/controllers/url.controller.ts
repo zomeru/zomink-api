@@ -70,6 +70,22 @@ export const createShortURLHandler = async (
     }
 
     if (!body.user) {
+      if (body.alias) {
+        const newOjb = {
+          ...body,
+          alias,
+          link,
+        };
+
+        const shortUrl = await createShortURL(newOjb);
+
+        return res.status(SuccessType.Created).json({
+          status: StatusType.Success,
+          data: {
+            urlData: omit(shortUrl.toObject(), ['__v']),
+          },
+        });
+      }
       const shortUrlWithoutUser = await findUrlByLink(link);
 
       if (shortUrlWithoutUser && !shortUrlWithoutUser.user) {

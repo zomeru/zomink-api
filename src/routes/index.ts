@@ -6,10 +6,8 @@ import urls from './url.route';
 
 const router = express.Router();
 
-router.get('/healthcheck', (_, res) => res.sendStatus(200));
-
-router.use(auth);
-router.use(user);
-router.use(urls);
+router.use(auth); // domain.com/auth
+router.use(user); // domain.com/users
+router.use(urls); // domain.com/urls
 
 export default router;
