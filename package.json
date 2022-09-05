@@ -13,8 +13,7 @@
     "prepare": "husky install",
     "start": "cross-env NODE_ENV=production node dist/app.js",
     "clean:win": "rmdir /s /q dist && rmdir /s /q node_modules",
-    "clean": "rm -rf dist && rm -rf node_modules",
-    "install": "rm -rf node_modules && yarn install --frozen-lockfile"
+    "clean": "rm -rf dist && rm -rf node_modules"
   },
   "dependencies": {
     "@typegoose/typegoose": "^9.11.2",
