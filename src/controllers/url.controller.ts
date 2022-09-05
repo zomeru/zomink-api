@@ -56,10 +56,14 @@ export const createShortURLHandler = async (
       const existingUrlWithUser = await findUrlByUserAndLink(body.user, link);
 
       if (existingUrlWithUser) {
+        // just update the timestamp
+        existingUrlWithUser.updatedAt = new Date();
+        const updatedUrl = await existingUrlWithUser.save();
+
         return res.status(SuccessType.OK).json({
           status: StatusType.Success,
           data: {
-            urlData: omit(existingUrlWithUser.toObject(), ['__v']),
+            urlData: omit(updatedUrl.toObject(), ['__v']),
           },
         });
       }
@@ -121,13 +125,13 @@ export const getUserUrls = async (
 
     console.log(res.locals.token.userId);
 
-    const urls = await findUrlsByUserId(res.locals.token.userId);
+    const urls = await findUrlsByUserId(res.locals.token.userId).sort({
+      updatedAt: -1,
+    });
 
     if (!urls) {
       return next(new AppError('No urls found', ErrorType.NotFoundException));
     }
-
-    console.log('urls', urls);
 
     return res.status(SuccessType.OK).json({
       status: StatusType.Success,

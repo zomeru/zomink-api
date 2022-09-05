@@ -11,7 +11,10 @@
     "format": "prettier --write ./src",
     "lint": "eslint --ext .ts,.js ./src",
     "prepare": "husky install",
-    "start": "NODE_ENV=production node dist/app.js"
+    "start": "cross-env NODE_ENV=production node dist/app.js",
+    "clean:win": "rmdir /s /q dist && rmdir /s /q node_modules",
+    "clean": "rm -rf dist && rm -rf node_modules",
+    "install": "rm -rf node_modules && yarn install --frozen-lockfile"
   },
   "dependencies": {
     "@typegoose/typegoose": "^9.11.2",
@@ -22,8 +25,11 @@
     "dayjs": "^1.11.5",
     "dotenv": "^16.0.1",
     "express": "^5.0.0-beta.1",
+    "express-mongo-sanitize": "^2.2.0",
+    "express-rate-limit": "^6.6.0",
     "helmet": "^6.0.0",
     "hpp": "^0.2.3",
+    "http-proxy-middleware": "^2.0.6",
     "jsonwebtoken": "^8.5.1",
     "lodash": "^4.17.21",
     "mongoose": "^6.5.3",
@@ -33,6 +39,7 @@
     "nodemailer-smtp-transport": "^2.7.4",
     "pino": "^8.4.2",
     "pino-pretty": "^9.1.0",
+    "x-xss-protection": "^2.0.0",
     "zod": "^3.18.0"
   },
   "devDependencies": {
@@ -67,5 +74,6 @@
   "lint-staged": {
     "*.{js,ts}": "eslint --cache --fix",
     "*.{js,ts,md,json,yml,yaml}": "prettier --write"
-  }
+  },
+  "packageManager": "yarn@3.2.3"
 }
