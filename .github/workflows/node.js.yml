@@ -16,11 +16,23 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+
       - name: Use Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v3
         with:
           node-version: ${{ matrix.node-version }}
-          cache: 'npm'
-      - run: npm install -g yarn
-      - run: rm -rf node_modules && yarn install --frozen-lockfile
-      - run: yarn run build
+
+      - name: Setup yarn
+        run: npm install -g yarn
+
+      - name: Setup Node.js with yarn caching
+        uses: actions/setup-node@v3
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: yarn
+
+      - name: Install dependencies
+        run: yarn install --frozen-lockfile
+
+      - name: Build
+        run: yarn run build
