@@ -25,11 +25,7 @@ jobs:
       - name: Setup yarn
         run: npm install -g yarn
 
-      - name: Setup Node.js with yarn caching
-        uses: actions/setup-node@v3
-        with:
-          node-version: ${{ matrix.node-version }}
-          cache: yarn
+      - uses: c-hive/gha-yarn-cache@v2
 
       - name: Install dependencies
         run: yarn install --frozen-lockfile
