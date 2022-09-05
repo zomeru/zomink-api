@@ -12,6 +12,7 @@ import {
 } from '../utils/appError';
 
 import { buildTokens, setTokens } from '../utils/jwt';
+import sendEmail from '../utils/sendMail';
 
 export const createUserHandler = async (
   req: Request<{}, {}, CreateUserInput>,
@@ -25,6 +26,25 @@ export const createUserHandler = async (
 
     const { accessToken, refreshToken } = buildTokens(user);
     setTokens(res, accessToken, refreshToken);
+
+    const verifyLink = `${process.env.CLIENT_ORIGIN}/verify/${user._id}?token=${user.verificationCode}`;
+
+    const mailOptions = {
+      from: `Zomink <${process.env.ZOMINK_EMAIL}>`,
+      to: user.email,
+      subject: 'Welcome to Zomink',
+      template: 'email',
+      context: {
+        headTitle: 'Account verification',
+        title: 'Welcome to Zomink',
+        description: `Hi ${user.firstName}, you're almost ready to start enjoying all the features of Zomink. Just click the button below to verify your email address.`,
+        redirectUrl: verifyLink,
+        buttonText: 'Verify Email',
+        optionLink: verifyLink,
+      },
+    };
+
+    await sendEmail(mailOptions);
 
     return res.status(SuccessType.Created).json({
       status: StatusType.Success,
