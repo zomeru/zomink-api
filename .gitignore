@@ -14,3 +14,12 @@ log/access.log
 .cache/
 .eslintcache
 .vercel
+
+# yarn
+.yarn/*
+!.yarn/patches
+!.yarn/releases
+!.yarn/plugins
+!.yarn/sdks
+!.yarn/versions
+.pnp.*

@@ -12,6 +12,9 @@ import { User } from './user.model';
 export const privateFields = ['__v'];
 
 @index({ alias: 1 })
+@index({ updatedAt: 1 })
+@index({ user: 1 })
+@index({ user: 1, link: 1 })
 @modelOptions({
   schemaOptions: {
     timestamps: true,
@@ -29,6 +32,9 @@ export class URL {
 
   @prop({ unique: true, type: String })
   alias: string;
+
+  @prop({ type: Date })
+  updatedAt: Date;
 }
 
 const URLModel = getModelForClass(URL);

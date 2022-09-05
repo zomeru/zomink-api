@@ -31,6 +31,7 @@ export const privateFields = [
   // eslint-disable-next-line no-useless-return
   return;
 })
+@index({ email: 1 })
 @index({ email: 1, username: 1 })
 @modelOptions({
   schemaOptions: {
