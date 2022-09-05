@@ -1,8 +1,8 @@
 import { customAlphabet } from 'nanoid';
 
-export const aliasGen = () => {
+export const aliasGen = (length?: number) => {
   const alphaNum =
     '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 
-  return customAlphabet(alphaNum, 5)();
+  return customAlphabet(alphaNum, length || 5)();
 };

@@ -13,8 +13,7 @@
     "prepare": "husky install",
     "start": "cross-env NODE_ENV=production node dist/app.js",
     "clean:win": "rmdir /s /q dist && rmdir /s /q node_modules",
-    "clean": "rm -rf dist && rm -rf node_modules",
-    "install": "yarn cache clean && yarn install --audit"
+    "clean": "rm -rf dist && rm -rf node_modules"
   },
   "dependencies": {
     "@typegoose/typegoose": "^9.11.2",
@@ -34,6 +33,8 @@
     "mongoose": "^6.5.3",
     "morgan": "^1.10.0",
     "nanoid": "3.3.4",
+    "nodemailer": "^6.7.8",
+    "nodemailer-express-handlebars": "^5.0.0",
     "pino": "^8.4.2",
     "pino-pretty": "^9.1.0",
     "x-xss-protection": "^2.0.0",
@@ -48,6 +49,7 @@
     "@types/lodash": "^4.14.184",
     "@types/morgan": "^1.9.3",
     "@types/nodemailer": "^6.4.5",
+    "@types/nodemailer-express-handlebars": "^4.0.2",
     "@types/nodemailer-smtp-transport": "^2.7.5",
     "@types/uuid": "^8.3.4",
     "@typescript-eslint/eslint-plugin": "^5.36.0",

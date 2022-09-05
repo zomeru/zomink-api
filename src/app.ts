@@ -40,7 +40,7 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('tiny'));
 }
 
-// limit requests from same API to 500 per hour
+// limit requests from the same IP to 500 per hour
 const limiter = rateLimit({
   windowMs: 60 * 60 * 1000,
   max: 500,
