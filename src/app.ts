@@ -4,7 +4,6 @@ import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import helmet from 'helmet';
-import mongoSanitize from 'express-mongo-sanitize';
 import { createProxyMiddleware } from 'http-proxy-middleware';
 import xXssProtection from 'x-xss-protection';
 import hpp from 'hpp';
@@ -25,13 +24,6 @@ const corsOptions = {
   credentials: true,
 };
 app.use(cors(corsOptions));
-
-// Proxy middleware
-const proxyOptions = {
-  target: process.env.API_URL,
-  changeOrigin: true,
-};
-app.use('/', createProxyMiddleware(proxyOptions));
 
 // Headers middleware
 app.use(cookieParser());
@@ -60,18 +52,23 @@ app.use('/api', limiter);
 app.use(express.json());
 
 // Protection middleware
-app.use(mongoSanitize());
 app.use(xXssProtection());
 app.use(hpp());
 
 // Routes
 app.use(router);
 
+// Proxy middleware
+const proxyOptions = {
+  target: process.env.API_URL,
+  changeOrigin: true,
+};
+app.use('/', createProxyMiddleware(proxyOptions));
+
 // Error handler
 app.use(globalErrorHandler);
 
 const PORT = Number(process.env.PORT);
-
 app.listen(PORT, () => {
   if (process.env.NODE_ENV === 'development') {
     log.info(PORT, typeof PORT);
