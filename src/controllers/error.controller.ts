@@ -14,7 +14,7 @@ export const globalErrorHandler = (
   err: AppError,
   _req: any,
   res: Response<any, Record<string, any>>,
-  next: any // eslint-disable-line no-unused-vars
+  _next: any // eslint-disable-line no-unused-vars
 ) => {
   /* eslint-disable no-param-reassign */
   err.statusCode = err.statusCode || 500;

@@ -6,6 +6,14 @@ import path from 'path';
 
 import log from './logger';
 
+const handlebarOptions: NodemailerExpressHandlebarsOptions = {
+  viewEngine: {
+    partialsDir: path.resolve(__dirname, '../../templates'),
+    defaultLayout: false,
+  },
+  viewPath: path.resolve(__dirname, '../../templates'),
+};
+
 async function sendEmail(options: SendMailOptions) {
   const transporter = nodemailer.createTransport({
     service: 'sendinblue',
@@ -14,14 +22,6 @@ async function sendEmail(options: SendMailOptions) {
       pass: process.env.SMTP_PASS,
     },
   });
-
-  const handlebarOptions: NodemailerExpressHandlebarsOptions = {
-    viewEngine: {
-      partialsDir: path.resolve(__dirname, '../templates'),
-      defaultLayout: false,
-    },
-    viewPath: path.resolve(__dirname, '../templates'),
-  };
 
   transporter.use('compile', hbs(handlebarOptions));
 
