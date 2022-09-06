@@ -57,10 +57,10 @@ export class User {
   @prop({ required: true, type: String })
   password: string;
 
-  @prop({ required: true, default: () => nanoid(), type: String })
+  @prop({ required: true, default: (): string => nanoid(), type: String })
   tokenVersion: string;
 
-  @prop({ required: true, default: () => nanoid(), type: String })
+  @prop({ required: true, default: (): string => nanoid(), type: String })
   verificationCode: string;
 
   @prop({ type: String })

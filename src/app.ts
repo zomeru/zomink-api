@@ -20,7 +20,7 @@ const app = express();
 
 // CORS middleware
 const corsOptions = {
-  origin: process.env.CLIENT_ORIGIN,
+  origin: process.env['CLIENT_ORIGIN'],
   credentials: true,
 };
 app.use(cors(corsOptions));
@@ -29,14 +29,14 @@ app.use(cors(corsOptions));
 app.use(cookieParser());
 app.use(helmet());
 
-if (process.env.NODE_ENV === 'production') {
+if (process.env['NODE_ENV'] === 'production') {
   app.set('trust proxy', 1);
 }
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static('public'));
 
-if (process.env.NODE_ENV === 'development') {
+if (process.env['NODE_ENV'] === 'development') {
   app.use(morgan('tiny'));
 }
 
@@ -60,7 +60,7 @@ app.use(router);
 
 // Proxy middleware
 const proxyOptions = {
-  target: process.env.API_URL,
+  target: process.env['API_URL'],
   changeOrigin: true,
 };
 app.use('/', createProxyMiddleware(proxyOptions));
@@ -68,9 +68,9 @@ app.use('/', createProxyMiddleware(proxyOptions));
 // Error handler
 app.use(globalErrorHandler);
 
-const PORT = Number(process.env.PORT);
+const PORT = Number(process.env['PORT']);
 app.listen(PORT, () => {
-  if (process.env.NODE_ENV === 'development') {
+  if (process.env['NODE_ENV'] === 'development') {
     log.info(PORT, typeof PORT);
     log.info(`Server started at http://localhost:${PORT}`);
   } else {

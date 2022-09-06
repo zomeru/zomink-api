@@ -1,9 +1,9 @@
-import { NextFunction, Request, Response } from 'express';
+import type { NextFunction, Request, Response } from 'express';
 import { omit } from 'lodash';
 import Cryptr from 'cryptr';
 
 import { privateFields } from '../models/user.model';
-import { CreateUserInput, VerifyUserInput } from '../schema/user.schema';
+import type { CreateUserInput, VerifyUserInput } from '../schema/user.schema';
 import { createUser, findUserById } from '../services/user.service';
 import {
   AppError,
@@ -29,22 +29,22 @@ export const createUserHandler = async (
     const { accessToken, refreshToken } = buildTokens(user);
     setTokens(res, accessToken, refreshToken);
 
-    const cryptr = new Cryptr(process.env.CRYPTO_SECRET_KEY as string);
+    const cryptr = new Cryptr(process.env['CRYPTO_SECRET_KEY'] as string);
     const encryptedId = cryptr.encrypt(user._id.toString());
 
-    console.log('hashedId', encryptedId);
-
-    const verifyLink = `${process.env.CLIENT_ORIGIN}/verify/${encryptedId}?token=${user.verificationCode}`;
+    const verifyLink = `${process.env['CLIENT_ORIGIN']}/verify/${encryptedId}?token=${user.verificationCode}`;
 
     const mailOptions = {
-      from: `Zomink <${process.env.ZOMINK_EMAIL}>`,
+      from: `Zomink <${process.env['ZOMINK_EMAIL']}>`,
       to: user.email,
       subject: 'Account verification',
       template: 'email',
       context: {
         headTitle: 'Account verification',
         title: 'Welcome to Zomink',
-        description: `Hi ${user.firstName}, you're almost ready to start enjoying all the features of Zomink. Just click the button below to verify your email address.`,
+        description: `Hi ${
+          user.firstName || ''
+        }, you're almost ready to start enjoying all the features of Zomink. Just click the button below to verify your email address.`,
         redirectUrl: verifyLink,
         buttonText: 'Verify Email',
         optionLink: verifyLink,
@@ -63,7 +63,9 @@ export const createUserHandler = async (
     if (error.code === 11000) {
       return next(
         new AppError(
-          `A user with this ${Object.keys(error.keyValue)[0]} already exists`,
+          `A user with this ${
+            Object.keys(error.keyValue)[0] ?? 'credential'
+          } already exists`,
           ErrorType.BadRequestException
         )
       );
@@ -80,9 +82,9 @@ export const getCurrentUserHandler = async (
   res: Response,
   next: NextFunction
 ) => {
-  const user = await findUserById(res.locals.token.userId);
+  const user = await findUserById(res.locals['token'].userId);
 
-  if (!user) {
+  if (user == null) {
     return next(new AppError('User not found', ErrorType.NotFoundException));
   }
 
@@ -101,7 +103,7 @@ export const verifyUserHandler = async (
 ) => {
   const { id, verificationCode } = req.params;
 
-  const cryptr = new Cryptr(process.env.CRYPTO_SECRET_KEY as string);
+  const cryptr = new Cryptr(process.env['CRYPTO_SECRET_KEY'] as string);
   const decryptedId = cryptr.decrypt(id);
 
   log.info('decryptedId', decryptedId);
@@ -109,7 +111,7 @@ export const verifyUserHandler = async (
   try {
     const user = await findUserById(decryptedId);
 
-    if (!user) {
+    if (user == null) {
       return next(new AppError('Invalid', ErrorType.BadRequestException));
     }
 

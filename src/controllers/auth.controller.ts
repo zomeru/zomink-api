@@ -1,8 +1,8 @@
-import { NextFunction, Request, Response } from 'express';
+import type { NextFunction, Request, Response } from 'express';
 import { omit } from 'lodash';
 
 import { privateFields } from '../models/user.model';
-import { LoginInput } from '../schema/auth.schema';
+import type { LoginInput } from '../schema/auth.schema';
 import { updateTokenVersion } from '../services/auth.service';
 import {
   findUserById,
@@ -24,6 +24,7 @@ import {
   verifyRefreshToken,
 } from '../utils/jwt';
 
+// Add return type
 export const loginHandler = async (
   req: Request<{}, {}, LoginInput>,
   res: Response,
@@ -36,7 +37,7 @@ export const loginHandler = async (
 
     const user = await findUserByEmailOrUsername(email.toLowerCase());
 
-    if (!user) {
+    if (user == null) {
       return next(new AppError(errorMessage, ErrorType.UnauthorizedException));
     }
 
@@ -79,7 +80,7 @@ export const logoutAllHandler = async (
 ) => {
   const message = 'Something went wrong. Please try again later';
   try {
-    await updateTokenVersion(res.locals.token.userId);
+    await updateTokenVersion(res.locals['token'].userId);
 
     clearTokens(res);
     return res.status(SuccessType.OK).json({
@@ -102,13 +103,13 @@ export const alreadyLoggedInHandler = async (
   try {
     const token = verifyAccessToken(req.cookies[NewCookies.AccessToken]);
 
-    if (!token) {
+    if (token == null) {
       return next();
     }
 
     const user = await findUserById(token?.userId);
 
-    if (user) {
+    if (user != null) {
       return next(
         new AppError(
           'You are already logged in.',
@@ -132,7 +133,7 @@ export const refreshAccessTokenHandler = async (
   try {
     const current = verifyRefreshToken(req.cookies[NewCookies.RefreshToken]);
     const user = await findUserById(current.userId);
-    if (!user) {
+    if (user == null) {
       return next(new AppError(errorMessage, ErrorType.BadRequestException));
     }
 
@@ -159,7 +160,7 @@ export const verifyUserCurrentTokenVersion = async (
     const current = verifyRefreshToken(req.cookies[NewCookies.RefreshToken]);
     const user = await findUserById(current.userId);
 
-    if (!user) {
+    if (user == null) {
       return next(new AppError(errorMessage, ErrorType.UnauthorizedException));
     }
 

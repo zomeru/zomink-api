@@ -39,10 +39,10 @@ export const SuccessType = {
   IMUsed: 226,
 };
 
-export type ErrorResponse = {
+export interface ErrorResponse {
   statusCode: number;
   message: string;
-};
+}
 
 export type ErrorTypeKeys = keyof typeof ErrorType;
 export type ErrorTypeValues = typeof ErrorType[ErrorTypeKeys]; //  "

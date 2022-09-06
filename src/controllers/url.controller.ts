@@ -1,7 +1,10 @@
-import { NextFunction, Request, Response } from 'express';
+import type { NextFunction, Request, Response } from 'express';
 import { omit } from 'lodash';
 
-import { CreateShortURLInput, GetShortURLInput } from '../schema/url.schema';
+import type {
+  CreateShortURLInput,
+  GetShortURLInput,
+} from '../schema/url.schema';
 import {
   createShortURL,
   findUrlByAlias,
@@ -33,12 +36,12 @@ export const createShortURLHandler = async (
       return next(new AppError('Invalid link', ErrorType.BadRequestException));
     }
 
-    if (body.alias) {
+    if (body.alias !== undefined) {
       const newAlias = body.alias.trim();
 
       const existingAlias = await findUrlByAlias(newAlias);
 
-      if (existingAlias) {
+      if (existingAlias != null) {
         return next(
           new AppError('Alias already taken', ErrorType.BadRequestException)
         );
@@ -52,10 +55,10 @@ export const createShortURLHandler = async (
       alias = newAlias;
     }
 
-    if (body.user) {
+    if (body.user !== undefined) {
       const existingUrlWithUser = await findUrlByUserAndLink(body.user, link);
 
-      if (existingUrlWithUser) {
+      if (existingUrlWithUser != null) {
         // just update the timestamp
         existingUrlWithUser.updatedAt = new Date();
         const updatedUrl = await existingUrlWithUser.save();
@@ -69,8 +72,8 @@ export const createShortURLHandler = async (
       }
     }
 
-    if (!body.user) {
-      if (body.alias) {
+    if (body.user === undefined) {
+      if (body.alias !== undefined) {
         const newOjb = {
           ...body,
           alias,
@@ -89,7 +92,7 @@ export const createShortURLHandler = async (
       }
       const shortUrlWithoutUser = await findUrlByLink(link);
 
-      if (shortUrlWithoutUser && !shortUrlWithoutUser.user) {
+      if (shortUrlWithoutUser != null && shortUrlWithoutUser.user == null) {
         return res.status(SuccessType.OK).json({
           status: StatusType.Success,
           data: {
@@ -99,12 +102,12 @@ export const createShortURLHandler = async (
       }
     }
 
-    if (!body.alias) {
+    if (body.alias === undefined) {
       while (true) {
         const newAlias = aliasGen();
         const existingAlias = await findUrlByAlias(alias); // eslint-disable-line no-await-in-loop
 
-        if (!existingAlias) {
+        if (existingAlias == null) {
           alias = newAlias;
           break;
         }
@@ -115,7 +118,7 @@ export const createShortURLHandler = async (
       ...body,
       alias,
       link,
-      isCustomAlias: !!body.alias,
+      isCustomAlias: body.alias !== undefined,
     };
 
     const shortUrl = await createShortURL(newOjb);
@@ -139,18 +142,20 @@ export const getUserUrls = async (
   next: NextFunction
 ) => {
   try {
-    const urls = await findUrlsByUserId(res.locals.token.userId).sort({
+    const urls = (await findUrlsByUserId(res.locals['token'].userId).sort({
       updatedAt: -1,
-    });
+    })) as any[];
 
-    if (!urls) {
+    if (urls !== undefined) {
       return next(new AppError('No urls found', ErrorType.NotFoundException));
     }
+
+    const urlsData: any[] = urls as any[];
 
     return res.status(SuccessType.OK).json({
       status: StatusType.Success,
       data: {
-        urlData: urls.map((url) => omit(url.toObject(), ['__v'])),
+        urlData: urlsData.map((url: any) => omit(url.toObject(), ['__v'])),
       },
     });
   } catch (error: any) {
@@ -170,7 +175,7 @@ export const getShortURL = async (
   try {
     const url = await findUrlByAlias(alias);
 
-    if (!url) {
+    if (url == null) {
       return next(new AppError('Url not found', ErrorType.NotFoundException));
     }
 
