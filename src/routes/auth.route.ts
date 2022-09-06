@@ -6,13 +6,18 @@ import {
   logoutAllHandler,
   logoutHandler,
   refreshAccessTokenHandler,
+  alreadyLoggedInHandler,
 } from '../controllers/auth.controller';
 import { loginSchema } from '../schema/auth.schema';
 import requireUser from '../middlewares/requireUser';
 
 const router = express.Router();
 
-router.post('/auth/login', validateResource(loginSchema), loginHandler);
+router.post(
+  '/auth/login',
+  [alreadyLoggedInHandler, validateResource(loginSchema)],
+  loginHandler
+);
 
 router.post('/auth/refresh', refreshAccessTokenHandler);
 

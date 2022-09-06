@@ -16,6 +16,7 @@ import {
   // verifyUserSchema,
 } from '../schema/user.schema';
 import requireUser from '../middlewares/requireUser';
+import { verifyUserCurrentTokenVersion } from '../controllers/auth.controller';
 
 const router = express.Router();
 
@@ -39,6 +40,10 @@ router.post('/users', validateResource(createUserSchema), createUserHandler);
 //   resetPasswordHandler
 // );
 
-router.get('/users/me', requireUser, getCurrentUserHandler);
+router.get(
+  '/users/me',
+  [requireUser, verifyUserCurrentTokenVersion],
+  getCurrentUserHandler
+);
 
 export default router;

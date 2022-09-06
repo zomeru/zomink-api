@@ -6,7 +6,7 @@ export function createShortURL(input: CreateShortURLInput) {
 }
 
 export function findUrlByLink(link: string) {
-  return URLModel.findOne({ link });
+  return URLModel.findOne({ link, isCustomAlias: false });
 }
 
 export function findUrlByAlias(alias: string) {

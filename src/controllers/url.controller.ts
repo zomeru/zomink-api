@@ -75,6 +75,7 @@ export const createShortURLHandler = async (
           ...body,
           alias,
           link,
+          isCustomAlias: true,
         };
 
         const shortUrl = await createShortURL(newOjb);
@@ -114,6 +115,7 @@ export const createShortURLHandler = async (
       ...body,
       alias,
       link,
+      isCustomAlias: !!body.alias,
     };
 
     const shortUrl = await createShortURL(newOjb);
@@ -137,10 +139,6 @@ export const getUserUrls = async (
   next: NextFunction
 ) => {
   try {
-    // const user = await findUrlsByUserId(res.locals.token.userId);
-
-    console.log(res.locals.token.userId);
-
     const urls = await findUrlsByUserId(res.locals.token.userId).sort({
       updatedAt: -1,
     });

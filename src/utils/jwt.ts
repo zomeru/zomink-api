@@ -11,7 +11,7 @@ export interface AccessTokenPayload {
 
 export interface RefreshTokenPayload {
   userId: string;
-  version: number;
+  tokenVersion: string;
 }
 
 export interface AccessToken extends AccessTokenPayload {
@@ -45,7 +45,7 @@ export function buildTokens(user: DocumentType<User>) {
   const accessPayload: AccessTokenPayload = { userId: user._id };
   const refreshPayload: RefreshTokenPayload = {
     userId: user._id,
-    version: user.tokenVersion,
+    tokenVersion: user.tokenVersion,
   };
 
   const accessToken = signAccessToken(accessPayload);
@@ -105,10 +105,7 @@ export function verifyAccessToken(token: string) {
   }
 }
 
-export function refreshTokens(current: RefreshToken, tokenVersion: number) {
-  // eslint-disable-next-line no-throw-literal
-  if (tokenVersion !== current.version) throw 'Token revoked';
-
+export function refreshTokens(current: RefreshToken, tokenVersion: string) {
   const accessPayload: AccessTokenPayload = { userId: current.userId };
   const accessToken = signAccessToken(accessPayload);
 
@@ -121,7 +118,7 @@ export function refreshTokens(current: RefreshToken, tokenVersion: number) {
   if (secondsUntilExpiration < TokenExpiration.RefreshIfLessThan) {
     refreshPayload = {
       userId: current.userId,
-      version: tokenVersion,
+      tokenVersion,
     };
   }
 
