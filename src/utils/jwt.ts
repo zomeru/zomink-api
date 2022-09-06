@@ -1,9 +1,9 @@
 /* eslint-disable no-unused-vars */
-import { DocumentType } from '@typegoose/typegoose';
-import { CookieOptions, Response } from 'express';
+import type { DocumentType } from '@typegoose/typegoose';
+import type { CookieOptions, Response } from 'express';
 import jwt from 'jsonwebtoken';
 
-import { User } from '../models/user.model';
+import type { User } from '../models/user.model';
 
 export interface AccessTokenPayload {
   userId: string;
@@ -30,13 +30,13 @@ export enum TokenExpiration {
 }
 
 function signAccessToken(payload: AccessTokenPayload) {
-  return jwt.sign(payload, process.env.ACCESS_SECRET_KEY as string, {
+  return jwt.sign(payload, process.env?.['ACCESS_SECRET_KEY'] as string, {
     expiresIn: TokenExpiration.Access,
   });
 }
 
 function signRefreshToken(payload: RefreshTokenPayload) {
-  return jwt.sign(payload, process.env.REFRESH_SECRET_KEY as string, {
+  return jwt.sign(payload, process.env?.['REFRESH_SECRET_KEY'] as string, {
     expiresIn: TokenExpiration.Refresh,
   });
 }
@@ -49,7 +49,7 @@ export function buildTokens(user: DocumentType<User>) {
   };
 
   const accessToken = signAccessToken(accessPayload);
-  const refreshToken = refreshPayload && signRefreshToken(refreshPayload);
+  const refreshToken = signRefreshToken(refreshPayload);
 
   return {
     accessToken,
@@ -65,8 +65,8 @@ export enum NewCookies {
 /* eslint-enable  no-shadow */
 
 const defaultCookieOptions: CookieOptions = {
-  httpOnly: process.env.NODE_ENV === 'production',
-  secure: process.env.NODE_ENV === 'production',
+  httpOnly: process.env?.['NODE_ENV'] === 'production',
+  secure: process.env?.['NODE_ENV'] === 'production',
   sameSite: 'lax',
   path: '/',
 };
@@ -90,7 +90,7 @@ export function setTokens(res: Response, access: string, refresh?: string) {
 export function verifyRefreshToken(token: string) {
   return jwt.verify(
     token,
-    process.env.REFRESH_SECRET_KEY as string
+    process.env?.['REFRESH_SECRET_KEY'] as string
   ) as RefreshToken;
 }
 
@@ -98,7 +98,7 @@ export function verifyAccessToken(token: string) {
   try {
     return jwt.verify(
       token,
-      process.env.ACCESS_SECRET_KEY as string
+      process.env?.['ACCESS_SECRET_KEY'] as string
     ) as AccessToken;
   } catch (error) {
     return null;
@@ -122,7 +122,8 @@ export function refreshTokens(current: RefreshToken, tokenVersion: string) {
     };
   }
 
-  const refreshToken = refreshPayload && signRefreshToken(refreshPayload);
+  const refreshToken =
+    refreshPayload != null ? signRefreshToken(refreshPayload) : undefined;
 
   return {
     accessToken,

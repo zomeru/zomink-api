@@ -1,8 +1,8 @@
 import URLModel from '../models/url.model';
-import { CreateShortURLInput } from '../schema/url.schema';
+import type { CreateShortURLInput } from '../schema/url.schema';
 
-export function createShortURL(input: CreateShortURLInput) {
-  return URLModel.create(input);
+export async function createShortURL(input: CreateShortURLInput) {
+  return await URLModel.create(input);
 }
 
 export function findUrlByLink(link: string) {

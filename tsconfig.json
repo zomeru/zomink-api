@@ -10,11 +10,11 @@
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "forceConsistentCasingInFileNames": true,
-    "lib": ["es2020", "dom"],
+    "lib": ["es2021", "dom"],
     "module": "commonjs",
     "noFallthroughCasesInSwitch": true,
     "noImplicitAny": true,
-    "noImplicitReturns": false, //true
+    "noImplicitReturns": false,
     "noImplicitThis": true,
     "noUnusedParameters": true,
     "outDir": "./dist",
@@ -24,12 +24,16 @@
     "strictFunctionTypes": true,
     "strictNullChecks": true,
     "strictPropertyInitialization": false,
-    "target": "es2020",
-    "typeRoots": [
-      "./node_modules/@types",
-      "./src/@types",
-      "./src/utils/extensions.d.ts"
-    ]
+    "target": "es2021",
+    "baseUrl": ".",
+    "allowUnusedLabels": false,
+    "allowUnreachableCode": false,
+    "exactOptionalPropertyTypes": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noUncheckedIndexedAccess": true,
+    "importsNotUsedAsValues": "error",
+    "checkJs": true
   },
   "include": ["./src/**/*"]
 }
