@@ -20,6 +20,11 @@
     "prettier/prettier": "error",
     "no-underscore-dangle": "off",
     "consistent-return": "off",
-    "func-names": "off"
+    "func-names": "off",
+    "no-unused-vars": "warn",
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      { "varsIgnorePattern": "^_", "argsIgnorePattern": "^_" }
+    ]
   }
 }

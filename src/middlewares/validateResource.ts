@@ -5,7 +5,7 @@ import { AppError } from '../utils/appError';
 
 const validateResource =
   (schema: AnyZodObject) =>
-  (req: Request, res: Response, next: NextFunction) => {
+  (req: Request, _res: Response, next: NextFunction) => {
     try {
       schema.parse({
         body: req.body,
