@@ -1,16 +1,14 @@
+import { nanoid } from 'nanoid';
 import UserModel from '../models/user.model';
 
-export async function increaseTokenVersion(userId: string) {
-  // find one and update
-  const user = await UserModel.findOneAndUpdate(
-    { id: userId },
-    { $inc: { tokenVersion: 1 } },
+export async function updateTokenVersion(userId: string) {
+  const user = await UserModel.findByIdAndUpdate(
+    userId,
+    { tokenVersion: nanoid() },
     { new: true }
   );
 
   if (!user) {
     throw new Error('Error updating user');
   }
-
-  // return user;
 }

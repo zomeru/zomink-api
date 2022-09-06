@@ -2,9 +2,8 @@ import { NextFunction, Request, Response } from 'express';
 import { omit } from 'lodash';
 
 import { privateFields } from '../models/user.model';
-
 import { LoginInput } from '../schema/auth.schema';
-import { increaseTokenVersion } from '../services/auth.service';
+import { updateTokenVersion } from '../services/auth.service';
 import {
   findUserById,
   findUserByEmailOrUsername,
@@ -21,6 +20,7 @@ import {
   NewCookies,
   refreshTokens,
   setTokens,
+  verifyAccessToken,
   verifyRefreshToken,
 } from '../utils/jwt';
 
@@ -62,6 +62,66 @@ export const loginHandler = async (
   }
 };
 
+export const logoutHandler = async (_req: Request, res: Response) => {
+  clearTokens(res);
+  return res.status(SuccessType.OK).json({
+    status: SuccessType.OK,
+    data: {
+      message: 'Logged out successfully',
+    },
+  });
+};
+
+export const logoutAllHandler = async (
+  _req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const message = 'Something went wrong. Please try again later';
+  try {
+    await updateTokenVersion(res.locals.token.userId);
+
+    clearTokens(res);
+    return res.status(SuccessType.OK).json({
+      status: SuccessType.OK,
+      data: {
+        message: 'Logged out all devices successfully',
+      },
+    });
+  } catch (error) {
+    clearTokens(res);
+    return next(new AppError(message, ErrorType.InternalServerErrorException));
+  }
+};
+
+export const alreadyLoggedInHandler = async (
+  req: Request,
+  _res: Response,
+  next: NextFunction
+) => {
+  try {
+    const token = verifyAccessToken(req.cookies[NewCookies.AccessToken]);
+
+    if (!token) {
+      return next();
+    }
+
+    const user = await findUserById(token?.userId);
+
+    if (user) {
+      return next(
+        new AppError(
+          'You are already logged in.',
+          ErrorType.BadRequestException
+        )
+      );
+    }
+    return next();
+  } catch (error: any) {
+    return next();
+  }
+};
+
 export const refreshAccessTokenHandler = async (
   req: Request,
   res: Response,
@@ -80,6 +140,7 @@ export const refreshAccessTokenHandler = async (
       current,
       user.tokenVersion
     );
+
     setTokens(res, accessToken, refreshToken);
   } catch (error: any) {
     clearTokens(res);
@@ -87,24 +148,29 @@ export const refreshAccessTokenHandler = async (
   }
 };
 
-export const logoutHandler = async (_req: Request, res: Response) => {
-  clearTokens(res);
-  return res.status(SuccessType.OK).json({
-    status: SuccessType.OK,
-    data: {
-      message: 'Logged out successfully',
-    },
-  });
-};
+export const verifyUserCurrentTokenVersion = async (
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  const errorMessage = 'Unauthorized user';
 
-export const logoutAllHandler = async (_req: Request, res: Response) => {
-  await increaseTokenVersion(res.locals.token.userId);
+  try {
+    const current = verifyRefreshToken(req.cookies[NewCookies.RefreshToken]);
+    const user = await findUserById(current.userId);
 
-  clearTokens(res);
-  return res.status(SuccessType.OK).json({
-    status: SuccessType.OK,
-    data: {
-      message: 'Logged out all devices successfully',
-    },
-  });
+    if (!user) {
+      return next(new AppError(errorMessage, ErrorType.UnauthorizedException));
+    }
+
+    if (user.tokenVersion !== current.tokenVersion) {
+      clearTokens(res);
+      return next(new AppError(errorMessage, ErrorType.UnauthorizedException));
+    }
+
+    next();
+  } catch (error) {
+    clearTokens(res);
+    return next(new AppError(errorMessage, ErrorType.UnauthorizedException));
+  }
 };

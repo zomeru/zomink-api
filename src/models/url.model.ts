@@ -33,6 +33,9 @@ export class URL {
   @prop({ unique: true, type: String })
   alias: string;
 
+  @prop({ type: Boolean })
+  isCustomAlias: boolean;
+
   @prop({ type: Date })
   updatedAt: Date;
 }
