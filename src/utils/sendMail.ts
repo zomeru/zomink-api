@@ -24,7 +24,6 @@ async function sendEmail(options: SendMailOptions) {
   });
 
   transporter.use('compile', hbs(handlebarOptions));
-
   transporter.sendMail(options, (error, info) => {
     if (error) {
       log.error(`Error sending email: ${error}`);

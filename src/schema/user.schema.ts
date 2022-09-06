@@ -28,8 +28,8 @@ export const createUserSchema = object({
 
 export const verifyUserSchema = object({
   params: object({
-    id: string(),
-    verificationCode: string(),
+    id: string().min(1, 'Invalid verification link'),
+    verificationCode: string().min(1, 'Invalid verification link'),
   }),
 });
 

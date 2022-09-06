@@ -4,16 +4,16 @@ import validateResource from '../middlewares/validateResource';
 import {
   createUserHandler,
   getCurrentUserHandler,
+  verifyUserHandler,
   // forgotPasswordHandler,
-  // verifyUserHandler,
   // resetPasswordHandler,
   // getCurrentUserHandler,
 } from '../controllers/user.controller';
 import {
   createUserSchema,
+  verifyUserSchema,
   // forgotPasswordSchema,
   // resetPasswordSchema,
-  // verifyUserSchema,
 } from '../schema/user.schema';
 import requireUser from '../middlewares/requireUser';
 import { verifyUserCurrentTokenVersion } from '../controllers/auth.controller';
@@ -22,11 +22,11 @@ const router = express.Router();
 
 router.post('/users', validateResource(createUserSchema), createUserHandler);
 
-// router.post(
-//   '/users/verify/:id/:verificationCode',
-//   validateResource(verifyUserSchema),
-//   verifyUserHandler
-// );
+router.post(
+  '/users/verify/:id/:verificationCode',
+  validateResource(verifyUserSchema),
+  verifyUserHandler
+);
 
 // router.post(
 //   '/users/forgotPassword',

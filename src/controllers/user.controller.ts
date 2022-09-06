@@ -1,8 +1,9 @@
 import { NextFunction, Request, Response } from 'express';
 import { omit } from 'lodash';
+import Cryptr from 'cryptr';
 
 import { privateFields } from '../models/user.model';
-import { CreateUserInput } from '../schema/user.schema';
+import { CreateUserInput, VerifyUserInput } from '../schema/user.schema';
 import { createUser, findUserById } from '../services/user.service';
 import {
   AppError,
@@ -12,6 +13,7 @@ import {
 } from '../utils/appError';
 
 import { buildTokens, setTokens } from '../utils/jwt';
+import log from '../utils/logger';
 import sendEmail from '../utils/sendMail';
 
 export const createUserHandler = async (
@@ -27,12 +29,17 @@ export const createUserHandler = async (
     const { accessToken, refreshToken } = buildTokens(user);
     setTokens(res, accessToken, refreshToken);
 
-    const verifyLink = `${process.env.CLIENT_ORIGIN}/verify/${user._id}?token=${user.verificationCode}`;
+    const cryptr = new Cryptr(process.env.CRYPTO_SECRET_KEY as string);
+    const encryptedId = cryptr.encrypt(user._id.toString());
+
+    console.log('hashedId', encryptedId);
+
+    const verifyLink = `${process.env.CLIENT_ORIGIN}/verify/${encryptedId}?token=${user.verificationCode}`;
 
     const mailOptions = {
       from: `Zomink <${process.env.ZOMINK_EMAIL}>`,
       to: user.email,
-      subject: 'Welcome to Zomink',
+      subject: 'Account verification',
       template: 'email',
       context: {
         headTitle: 'Account verification',
@@ -87,38 +94,48 @@ export const getCurrentUserHandler = async (
   });
 };
 
-// export const verifyUserHandler = catchAsync(
-//   async (req: Request<VerifyUserInput>, res: Response, next: NextFunction) => {
-//     const { id, verificationCode } = req.params;
+export const verifyUserHandler = async (
+  req: Request<VerifyUserInput>,
+  res: Response,
+  next: NextFunction
+) => {
+  const { id, verificationCode } = req.params;
 
-//     const user = await findUserById(id);
+  const cryptr = new Cryptr(process.env.CRYPTO_SECRET_KEY as string);
+  const decryptedId = cryptr.decrypt(id);
 
-//     if (!user) {
-//       // return res.send('Could not verify user');
+  log.info('decryptedId', decryptedId);
 
-//       return next(new AppError('NotFoundException', 'User not found'));
-//     }
+  try {
+    const user = await findUserById(decryptedId);
 
-//     if (user.verified) {
-//       return next(
-//         new AppError('NotFoundException', 'User is already verified')
-//       );
-//     }
+    if (!user) {
+      return next(new AppError('Invalid', ErrorType.BadRequestException));
+    }
 
-//     if (user.verificationCode === verificationCode) {
-//       user.verified = true;
+    if (user.verified) {
+      return next(
+        new AppError('Already verified', ErrorType.BadRequestException)
+      );
+    }
+    if (user.verificationCode === verificationCode) {
+      user.verified = true;
+      await user.save();
+      return res.status(SuccessType.OK).json({
+        status: StatusType.Success,
+        message: 'Verified',
+      });
+    }
+  } catch (error: any) {
+    log.error(error.message);
+    return next(
+      new AppError('Invalid verification link', ErrorType.BadRequestException)
+    );
+  }
+};
 
-//       await user.save();
-
-//       return res.status(200).json({
-//         success: true,
-//         message: 'User successfully verified',
-//       });
-//     }
-
-//     return next(new AppError('NotFoundException', 'Could not verify user'));
-//   }
-// );
+//   return next(new AppError('NotFoundException', 'Could not verify user'));
+// };
 
 // export const forgotPasswordHandler = catchAsync(
 //   async (req: Request<{}, {}, ForgotPasswordInput>, res: Response) => {
