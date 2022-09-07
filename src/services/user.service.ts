@@ -17,3 +17,7 @@ export function findUserByEmailOrUsername(emailOrUsername: string) {
     $or: [{ username: emailOrUsername }, { email: emailOrUsername }],
   });
 }
+
+export function findByUserIdAndUpdate(id: string, input: Partial<User>) {
+  return UserModel.findByIdAndUpdate(id, input, { new: true });
+}

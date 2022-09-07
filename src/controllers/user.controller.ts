@@ -1,10 +1,13 @@
 import type { NextFunction, Request, Response } from 'express';
 import { omit } from 'lodash';
 
-import { stringToBase64, base64ToString } from '../utils/stringBuffer';
 import { privateFields } from '../models/user.model';
 import type { CreateUserInput, VerifyUserInput } from '../schema/user.schema';
-import { createUser, findUserById } from '../services/user.service';
+import {
+  createUser,
+  findByUserIdAndUpdate,
+  findUserById,
+} from '../services/user.service';
 import {
   AppError,
   ErrorType,
@@ -15,9 +18,10 @@ import {
 import { buildTokens, setTokens } from '../utils/jwt';
 import log from '../utils/logger';
 import sendEmail from '../utils/sendMail';
+import { encrypt, decrypt } from '../utils/crypto';
 
 export const createUserHandler = async (
-  req: Request<{}, {}, CreateUserInput>,
+  req: Request<any, any, CreateUserInput>,
   res: Response,
   next: NextFunction
 ) => {
@@ -29,7 +33,7 @@ export const createUserHandler = async (
     const { accessToken, refreshToken } = buildTokens(user);
     setTokens(res, accessToken, refreshToken);
 
-    const encryptedId = stringToBase64(user._id);
+    const encryptedId = encrypt(`${user._id}`);
 
     const verifyLink = `${process.env.CLIENT_ORIGIN}/verify/${encryptedId}?token=${user.verificationCode}`;
 
@@ -99,10 +103,7 @@ export const verifyUserHandler = async (
   next: NextFunction
 ) => {
   const { id, verificationCode } = req.params;
-
-  const decryptedId = base64ToString(id);
-
-  log.info('decryptedId', decryptedId);
+  const decryptedId = decrypt(id);
 
   try {
     const user = await findUserById(decryptedId);
@@ -124,7 +125,6 @@ export const verifyUserHandler = async (
     }
 
     user.verified = true;
-    user.verificationCode = null;
     await user.save();
     return res.status(SuccessType.OK).json({
       status: StatusType.Success,
@@ -133,8 +133,15 @@ export const verifyUserHandler = async (
   } catch (error: any) {
     log.error(error.message);
     return next(
-      new AppError('Invalid verification link', ErrorType.BadRequestException)
+      new AppError(
+        'We are unable to verify your email address at the moment.',
+        ErrorType.BadRequestException
+      )
     );
+  } finally {
+    await findByUserIdAndUpdate(decryptedId, {
+      verificationCode: null,
+    });
   }
 };
 
