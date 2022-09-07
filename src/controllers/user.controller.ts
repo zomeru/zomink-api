@@ -61,6 +61,8 @@ export const createUserHandler = async (
       },
     });
   } catch (error: any) {
+    log.error(error);
+
     if (error.code === 11000) {
       return next(
         new AppError(
@@ -131,7 +133,6 @@ export const verifyUserHandler = async (
       message: 'Verified',
     });
   } catch (error: any) {
-    log.error(error.message);
     return next(
       new AppError(
         'We are unable to verify your email address at the moment.',
