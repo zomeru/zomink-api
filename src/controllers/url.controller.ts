@@ -10,6 +10,7 @@ import {
   findUrlByAlias,
   findUrlByLink,
   findUrlByUserAndLink,
+  findUrlByUserAndLinkAndAlias,
   findUrlsByUserId,
 } from '../services/url.service';
 import {
@@ -19,7 +20,7 @@ import {
   SuccessType,
 } from '../utils/appError';
 import { aliasValid, linkValid } from '../utils/regEx';
-import { aliasGen } from '../utils/urls';
+import { aliasGen, removeForwardSlash } from '../utils/urls';
 
 export const createShortURLHandler = async (
   req: Request<{}, {}, CreateShortURLInput>,
@@ -30,50 +31,36 @@ export const createShortURLHandler = async (
 
   try {
     let alias = '';
-    const link = body.link.trim();
+    const link = removeForwardSlash(body.link.trim());
 
     if (!linkValid(link)) {
       return next(new AppError('Invalid link', ErrorType.BadRequestException));
     }
 
-    if (body.alias !== undefined) {
+    if (body.alias) {
       const newAlias = body.alias.trim();
 
       const existingAlias = await findUrlByAlias(newAlias);
 
-      if (existingAlias != null) {
+      if (existingAlias) {
         return next(
           new AppError('Alias already taken', ErrorType.BadRequestException)
         );
       }
       if (!aliasValid(newAlias)) {
         return next(
-          new AppError('Invalid alias', ErrorType.BadRequestException)
+          new AppError(
+            'Alias must be 5 alphanumeric characters',
+            ErrorType.BadRequestException
+          )
         );
       }
 
       alias = newAlias;
     }
 
-    if (body.user !== undefined) {
-      const existingUrlWithUser = await findUrlByUserAndLink(body.user, link);
-
-      if (existingUrlWithUser != null) {
-        // just update the timestamp
-        existingUrlWithUser.updatedAt = new Date();
-        const updatedUrl = await existingUrlWithUser.save();
-
-        return res.status(SuccessType.OK).json({
-          status: StatusType.Success,
-          data: {
-            urlData: omit(updatedUrl.toObject(), ['__v']),
-          },
-        });
-      }
-    }
-
-    if (body.user === undefined) {
-      if (body.alias !== undefined) {
+    if (!body.user) {
+      if (body.alias) {
         const newOjb = {
           ...body,
           alias,
@@ -92,7 +79,7 @@ export const createShortURLHandler = async (
       }
       const shortUrlWithoutUser = await findUrlByLink(link);
 
-      if (shortUrlWithoutUser != null && shortUrlWithoutUser.user == null) {
+      if (shortUrlWithoutUser && !shortUrlWithoutUser.user) {
         return res.status(SuccessType.OK).json({
           status: StatusType.Success,
           data: {
@@ -102,15 +89,42 @@ export const createShortURLHandler = async (
       }
     }
 
-    if (body.alias === undefined) {
+    if (!body.alias) {
+      // eslint-disable-next-line no-constant-condition
       while (true) {
         const newAlias = aliasGen();
         const existingAlias = await findUrlByAlias(alias); // eslint-disable-line no-await-in-loop
 
-        if (existingAlias == null) {
+        if (!existingAlias) {
           alias = newAlias;
           break;
         }
+      }
+    }
+
+    if (body.user) {
+      let existingUrlWithUser;
+      if (body.alias) {
+        existingUrlWithUser = await findUrlByUserAndLinkAndAlias(
+          body.user,
+          link,
+          alias
+        );
+      } else {
+        existingUrlWithUser = await findUrlByUserAndLink(body.user, link);
+      }
+
+      if (existingUrlWithUser) {
+        // just update the timestamp
+        existingUrlWithUser.updatedAt = new Date();
+        const updatedUrl = await existingUrlWithUser.save();
+
+        return res.status(SuccessType.OK).json({
+          status: StatusType.Success,
+          data: {
+            urlData: omit(updatedUrl.toObject(), ['__v']),
+          },
+        });
       }
     }
 
@@ -118,7 +132,7 @@ export const createShortURLHandler = async (
       ...body,
       alias,
       link,
-      isCustomAlias: body.alias !== undefined,
+      isCustomAlias: !!body.alias,
     };
 
     const shortUrl = await createShortURL(newOjb);
@@ -142,20 +156,18 @@ export const getUserUrls = async (
   next: NextFunction
 ) => {
   try {
-    const urls = (await findUrlsByUserId(res.locals['token'].userId).sort({
+    const urls = (await findUrlsByUserId(res.locals.token.userId).sort({
       updatedAt: -1,
     })) as any[];
 
-    if (urls !== undefined) {
+    if (!urls) {
       return next(new AppError('No urls found', ErrorType.NotFoundException));
     }
-
-    const urlsData: any[] = urls as any[];
 
     return res.status(SuccessType.OK).json({
       status: StatusType.Success,
       data: {
-        urlData: urlsData.map((url: any) => omit(url.toObject(), ['__v'])),
+        urlData: urls.map((url: any) => omit(url.toObject(), ['__v'])),
       },
     });
   } catch (error: any) {
@@ -175,7 +187,7 @@ export const getShortURL = async (
   try {
     const url = await findUrlByAlias(alias);
 
-    if (url == null) {
+    if (!url) {
       return next(new AppError('Url not found', ErrorType.NotFoundException));
     }
 

@@ -30,7 +30,7 @@
     "allowUnreachableCode": false,
     "exactOptionalPropertyTypes": true,
     "noImplicitOverride": true,
-    "noPropertyAccessFromIndexSignature": true,
+    "noPropertyAccessFromIndexSignature": false,
     "noUncheckedIndexedAccess": true,
     "importsNotUsedAsValues": "error",
     "checkJs": true

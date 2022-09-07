@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from 'express';
 import { omit } from 'lodash';
-import Cryptr from 'cryptr';
 
+import { stringToBase64, base64ToString } from '../utils/stringBuffer';
 import { privateFields } from '../models/user.model';
 import type { CreateUserInput, VerifyUserInput } from '../schema/user.schema';
 import { createUser, findUserById } from '../services/user.service';
@@ -29,22 +29,19 @@ export const createUserHandler = async (
     const { accessToken, refreshToken } = buildTokens(user);
     setTokens(res, accessToken, refreshToken);
 
-    const cryptr = new Cryptr(process.env['CRYPTO_SECRET_KEY'] as string);
-    const encryptedId = cryptr.encrypt(user._id.toString());
+    const encryptedId = stringToBase64(user._id);
 
-    const verifyLink = `${process.env['CLIENT_ORIGIN']}/verify/${encryptedId}?token=${user.verificationCode}`;
+    const verifyLink = `${process.env.CLIENT_ORIGIN}/verify/${encryptedId}?token=${user.verificationCode}`;
 
     const mailOptions = {
-      from: `Zomink <${process.env['ZOMINK_EMAIL']}>`,
+      from: `Zomink <${process.env.ZOMINK_EMAIL}>`,
       to: user.email,
       subject: 'Account verification',
       template: 'email',
       context: {
         headTitle: 'Account verification',
-        title: 'Welcome to Zomink',
-        description: `Hi ${
-          user.firstName || ''
-        }, you're almost ready to start enjoying all the features of Zomink. Just click the button below to verify your email address.`,
+        title: 'Verify your email address',
+        description: `Hi ${user.firstName}, you're almost ready to start enjoying exclusive features of Zomink. Simply click the button below to verify your email address.`,
         redirectUrl: verifyLink,
         buttonText: 'Verify Email',
         optionLink: verifyLink,
@@ -82,9 +79,9 @@ export const getCurrentUserHandler = async (
   res: Response,
   next: NextFunction
 ) => {
-  const user = await findUserById(res.locals['token'].userId);
+  const user = await findUserById(res.locals.token.userId);
 
-  if (user == null) {
+  if (!user) {
     return next(new AppError('User not found', ErrorType.NotFoundException));
   }
 
@@ -103,16 +100,21 @@ export const verifyUserHandler = async (
 ) => {
   const { id, verificationCode } = req.params;
 
-  const cryptr = new Cryptr(process.env['CRYPTO_SECRET_KEY'] as string);
-  const decryptedId = cryptr.decrypt(id);
+  const decryptedId = base64ToString(id);
 
   log.info('decryptedId', decryptedId);
 
   try {
     const user = await findUserById(decryptedId);
 
-    if (user == null) {
+    if (!user) {
       return next(new AppError('Invalid', ErrorType.BadRequestException));
+    }
+
+    if (user.verificationCode !== verificationCode) {
+      return next(
+        new AppError('Invalid verification link', ErrorType.BadRequestException)
+      );
     }
 
     if (user.verified) {
@@ -120,14 +122,14 @@ export const verifyUserHandler = async (
         new AppError('Already verified', ErrorType.BadRequestException)
       );
     }
-    if (user.verificationCode === verificationCode) {
-      user.verified = true;
-      await user.save();
-      return res.status(SuccessType.OK).json({
-        status: StatusType.Success,
-        message: 'Verified',
-      });
-    }
+
+    user.verified = true;
+    user.verificationCode = null;
+    await user.save();
+    return res.status(SuccessType.OK).json({
+      status: StatusType.Success,
+      message: 'Verified',
+    });
   } catch (error: any) {
     log.error(error.message);
     return next(

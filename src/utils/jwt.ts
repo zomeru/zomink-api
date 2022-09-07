@@ -30,13 +30,13 @@ export enum TokenExpiration {
 }
 
 function signAccessToken(payload: AccessTokenPayload) {
-  return jwt.sign(payload, process.env?.['ACCESS_SECRET_KEY'] as string, {
+  return jwt.sign(payload, process.env.ACCESS_SECRET_KEY as string, {
     expiresIn: TokenExpiration.Access,
   });
 }
 
 function signRefreshToken(payload: RefreshTokenPayload) {
-  return jwt.sign(payload, process.env?.['REFRESH_SECRET_KEY'] as string, {
+  return jwt.sign(payload, process.env.REFRESH_SECRET_KEY as string, {
     expiresIn: TokenExpiration.Refresh,
   });
 }
@@ -65,8 +65,8 @@ export enum NewCookies {
 /* eslint-enable  no-shadow */
 
 const defaultCookieOptions: CookieOptions = {
-  httpOnly: process.env?.['NODE_ENV'] === 'production',
-  secure: process.env?.['NODE_ENV'] === 'production',
+  httpOnly: process.env.NODE_ENV === 'production',
+  secure: process.env.NODE_ENV === 'production',
   sameSite: 'lax',
   path: '/',
 };
@@ -90,7 +90,7 @@ export function setTokens(res: Response, access: string, refresh?: string) {
 export function verifyRefreshToken(token: string) {
   return jwt.verify(
     token,
-    process.env?.['REFRESH_SECRET_KEY'] as string
+    process.env.REFRESH_SECRET_KEY as string
   ) as RefreshToken;
 }
 
@@ -98,7 +98,7 @@ export function verifyAccessToken(token: string) {
   try {
     return jwt.verify(
       token,
-      process.env?.['ACCESS_SECRET_KEY'] as string
+      process.env.ACCESS_SECRET_KEY as string
     ) as AccessToken;
   } catch (error) {
     return null;
