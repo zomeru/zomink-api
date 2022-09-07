@@ -21,15 +21,13 @@ export const privateFields = [
   'tokenVersion',
 ];
 
+// eslint-disable-next-line no-use-before-define
 @pre<User>('save', async function () {
   if (!this.isModified('password')) return;
 
   const hash = await argon2.hash(this.password);
 
   this.password = hash;
-
-  // eslint-disable-next-line no-useless-return
-  return;
 })
 @index({ email: 1 })
 @index({ email: 1, username: 1 })
@@ -61,7 +59,7 @@ export class User {
   tokenVersion: string;
 
   @prop({ required: true, default: (): string => nanoid(), type: String })
-  verificationCode: string;
+  verificationCode: string | null;
 
   @prop({ type: String })
   passwordResetCode: string | null;

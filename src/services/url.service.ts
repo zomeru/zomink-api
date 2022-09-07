@@ -2,7 +2,7 @@ import URLModel from '../models/url.model';
 import type { CreateShortURLInput } from '../schema/url.schema';
 
 export async function createShortURL(input: CreateShortURLInput) {
-  return await URLModel.create(input);
+  return URLModel.create(input);
 }
 
 export function findUrlByLink(link: string) {
@@ -14,7 +14,15 @@ export function findUrlByAlias(alias: string) {
 }
 
 export function findUrlByUserAndLink(user: string, link: string) {
-  return URLModel.findOne({ user, link });
+  return URLModel.findOne({ user, link, isCustomAlias: false });
+}
+
+export function findUrlByUserAndLinkAndAlias(
+  user: string,
+  link: string,
+  alias: string
+) {
+  return URLModel.findOne({ user, link, isCustomAlias: true, alias });
 }
 
 export function findUrlsByUserId(id: string) {

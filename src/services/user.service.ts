@@ -1,7 +1,7 @@
 import UserModel, { User } from '../models/user.model';
 
 export async function createUser(input: Partial<User>) {
-  return await UserModel.create(input);
+  return UserModel.create(input);
 }
 
 export function findUserById(id: string) {

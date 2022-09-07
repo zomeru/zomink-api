@@ -80,7 +80,7 @@ export const logoutAllHandler = async (
 ) => {
   const message = 'Something went wrong. Please try again later';
   try {
-    await updateTokenVersion(res.locals['token'].userId);
+    await updateTokenVersion(res.locals.token.userId);
 
     clearTokens(res);
     return res.status(SuccessType.OK).json({

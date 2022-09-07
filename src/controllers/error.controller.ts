@@ -17,8 +17,8 @@ export const globalErrorHandler = (
   _next: any // eslint-disable-line no-unused-vars
 ) => {
   /* eslint-disable no-param-reassign */
-  err.statusCode = err.statusCode !== 0 ? err.statusCode : 500;
-  err.status = err.status !== '' ? err.status : 'error';
+  err.statusCode = err.statusCode || 500;
+  err.status = err.status || 'error';
   /* eslint-enable no-param-reassign */
 
   sendError(err, res);
