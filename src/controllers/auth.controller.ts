@@ -37,7 +37,7 @@ export const loginHandler = async (
 
     const user = await findUserByEmailOrUsername(email.toLowerCase());
 
-    if (user == null) {
+    if (!user) {
       return next(new AppError(errorMessage, ErrorType.UnauthorizedException));
     }
 
@@ -52,6 +52,8 @@ export const loginHandler = async (
 
     return res.status(SuccessType.OK).json({
       status: StatusType.Success,
+      // accessToken,
+      // refreshToken,
       data: {
         user: omit(user.toJSON(), privateFields),
       },
@@ -103,13 +105,13 @@ export const alreadyLoggedInHandler = async (
   try {
     const token = verifyAccessToken(req.cookies[NewCookies.AccessToken]);
 
-    if (token == null) {
+    if (!token) {
       return next();
     }
 
     const user = await findUserById(token?.userId);
 
-    if (user != null) {
+    if (user) {
       return next(
         new AppError(
           'You are already logged in.',
@@ -133,7 +135,7 @@ export const refreshAccessTokenHandler = async (
   try {
     const current = verifyRefreshToken(req.cookies[NewCookies.RefreshToken]);
     const user = await findUserById(current.userId);
-    if (user == null) {
+    if (!user) {
       return next(new AppError(errorMessage, ErrorType.BadRequestException));
     }
 
@@ -160,7 +162,7 @@ export const verifyUserCurrentTokenVersion = async (
     const current = verifyRefreshToken(req.cookies[NewCookies.RefreshToken]);
     const user = await findUserById(current.userId);
 
-    if (user == null) {
+    if (!user) {
       return next(new AppError(errorMessage, ErrorType.UnauthorizedException));
     }
 
@@ -170,6 +172,36 @@ export const verifyUserCurrentTokenVersion = async (
     }
 
     next();
+  } catch (error) {
+    clearTokens(res);
+    return next(new AppError(errorMessage, ErrorType.UnauthorizedException));
+  }
+};
+
+export const verifyAccessTokenHandler = async (
+  req: Request<{ token: string }>,
+  res: Response,
+  next: NextFunction
+) => {
+  const { token } = req.params;
+  const errorMessage = 'Unauthorized user';
+
+  try {
+    const current = verifyAccessToken(token);
+
+    if (!current) {
+      return next(new AppError(errorMessage, ErrorType.UnauthorizedException));
+    }
+
+    const user = await findUserById(current?.userId);
+
+    if (!user) {
+      return next(new AppError(errorMessage, ErrorType.UnauthorizedException));
+    }
+
+    return res.status(SuccessType.OK).json({
+      status: StatusType.Success,
+    });
   } catch (error) {
     clearTokens(res);
     return next(new AppError(errorMessage, ErrorType.UnauthorizedException));

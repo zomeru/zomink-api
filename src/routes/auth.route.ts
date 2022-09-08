@@ -7,6 +7,7 @@ import {
   logoutHandler,
   refreshAccessTokenHandler,
   alreadyLoggedInHandler,
+  verifyAccessTokenHandler,
 } from '../controllers/auth.controller';
 import { loginSchema } from '../schema/auth.schema';
 import requireUser from '../middlewares/requireUser';
@@ -20,6 +21,8 @@ router.post(
 );
 
 router.post('/auth/refresh', refreshAccessTokenHandler);
+
+router.post('/auth/access/:token', verifyAccessTokenHandler);
 
 router.post('/auth/logout', requireUser, logoutHandler);
 

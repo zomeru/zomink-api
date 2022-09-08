@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from 'express';
 import { omit } from 'lodash';
 
-import { privateFields } from '../models/user.model';
+import { privateFields, User } from '../models/user.model';
 import type { CreateUserInput, VerifyUserInput } from '../schema/user.schema';
 import {
   createUser,
@@ -28,7 +28,15 @@ export const createUserHandler = async (
   const { body } = req;
 
   try {
-    const user = await createUser(body);
+    const userInfo: CreateUserInput = {
+      ...body,
+      firstName: encrypt(body.firstName),
+      lastName: encrypt(body.lastName),
+    };
+
+    console.log('userInfo', userInfo);
+
+    const user = await createUser(userInfo);
 
     const { accessToken, refreshToken } = buildTokens(user);
     setTokens(res, accessToken, refreshToken);
@@ -54,10 +62,17 @@ export const createUserHandler = async (
 
     await sendEmail(mailOptions);
 
+    const newUser = omit(user.toJSON(), privateFields) as User;
+    const decryptedUser = {
+      ...newUser,
+      firstName: decrypt(newUser.firstName),
+      lastName: decrypt(newUser.lastName),
+    };
+
     return res.status(SuccessType.Created).json({
       status: StatusType.Success,
       data: {
-        user: omit(user.toJSON(), privateFields),
+        user: decryptedUser,
       },
     });
   } catch (error: any) {
@@ -91,10 +106,17 @@ export const getCurrentUserHandler = async (
     return next(new AppError('User not found', ErrorType.NotFoundException));
   }
 
+  const newUser = omit(user.toJSON(), privateFields) as User;
+  const decryptedUser = {
+    ...newUser,
+    firstName: decrypt(newUser.firstName),
+    lastName: decrypt(newUser.lastName),
+  };
+
   return res.status(SuccessType.OK).json({
     status: StatusType.Success,
     data: {
-      user: omit(user.toObject(), privateFields),
+      user: decryptedUser,
     },
   });
 };
@@ -221,23 +243,3 @@ export const verifyUserHandler = async (
 //     });
 //   }
 // );
-
-// export async function getCurrentUserHandler(
-//   _req: Request,
-//   res: Response,
-//   next: NextFunction
-// ) {
-//   // const { user } = res.locals;
-//   // req.session.user
-//   // return res.status(200).json({ user });
-
-//   const user = await UserModel.findById(res.locals.token.userId);
-//   if (!user) {
-//     return next(new AppError('NotFoundException', 'User Not Found'));
-//   }
-
-//   return res.status(200).json({
-//     success: true,
-//     user,
-//   });
-// }
