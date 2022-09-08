@@ -14,7 +14,6 @@ const validateResource =
       });
       next();
     } catch (error: any) {
-      // console.log('error va', error);
       return next(new AppError(error.issues[0].message, 400));
     }
   };
