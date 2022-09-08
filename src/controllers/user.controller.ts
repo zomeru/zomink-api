@@ -34,8 +34,6 @@ export const createUserHandler = async (
       lastName: encrypt(body.lastName),
     };
 
-    console.log('userInfo', userInfo);
-
     const user = await createUser(userInfo);
 
     const { accessToken, refreshToken } = buildTokens(user);
@@ -53,7 +51,9 @@ export const createUserHandler = async (
       context: {
         headTitle: 'Account verification',
         title: 'Verify your email address',
-        description: `Hi ${user.firstName}, you're almost ready to start enjoying exclusive features of Zomink. Simply click the button below to verify your email address.`,
+        description: `Hi ${decrypt(
+          user.firstName
+        )}, you're almost ready to start enjoying exclusive features of Zomink. Simply click the button below to verify your email address.`,
         redirectUrl: verifyLink,
         buttonText: 'Verify Email',
         optionLink: verifyLink,
