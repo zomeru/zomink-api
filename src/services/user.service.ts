@@ -28,7 +28,10 @@ export function findUserByEmailWithoutProvider(email: string) {
 
 export function findUserByEmailOrUsername(emailOrUsername: string) {
   return UserModel.findOne({
-    $or: [{ username: emailOrUsername }, { email: emailOrUsername }],
+    $or: [
+      { username: emailOrUsername, authProvider: 'none' },
+      { email: emailOrUsername, authProvider: 'none' },
+    ],
   });
 }
 
