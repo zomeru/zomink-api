@@ -6,9 +6,9 @@ import {
   findUserByEmailWithoutProvider,
   getGoogleOauthTokens,
   getGoogleUserInfo,
-} from 'src/services/user.service';
-import { encrypt } from 'src/utils/crypto';
-import { buildTokens, setTokens } from 'src/utils/jwt';
+} from '../services/user.service';
+import { encrypt } from '../utils/crypto';
+import { buildTokens, setTokens } from '../utils/jwt';
 
 export const googleOAuthHandler = async (req: Request, res: Response) => {
   try {

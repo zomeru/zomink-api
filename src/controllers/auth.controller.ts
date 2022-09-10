@@ -1,7 +1,7 @@
 import type { NextFunction, Request, Response } from 'express';
 import { omit } from 'lodash';
 
-import { decrypt } from 'src/utils/crypto';
+import { decrypt } from '../utils/crypto';
 import { privateFields, User } from '../models/user.model';
 import type { LoginInput } from '../schema/auth.schema';
 import { updateTokenVersion } from '../services/auth.service';
