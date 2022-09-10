@@ -58,14 +58,20 @@ export class User {
   @prop({ required: true, default: (): string => nanoid(), type: String })
   tokenVersion: string;
 
+  @prop({ required: false, default: 'none', type: String })
+  authProvider: string;
+
+  @prop({ required: false, default: null, type: String })
+  authProviderId: string | null;
+
+  @prop({ required: false, default: false, type: Boolean })
+  verified: boolean;
+
   @prop({ required: true, default: (): string => nanoid(), type: String })
   verificationCode: string | null;
 
   @prop({ type: String })
   passwordResetCode: string | null;
-
-  @prop({ default: false, type: Boolean })
-  verified: boolean;
 
   async validatePassword(this: DocumentType<User>, candidate: string) {
     try {

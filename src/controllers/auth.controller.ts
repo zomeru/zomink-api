@@ -1,7 +1,8 @@
 import type { NextFunction, Request, Response } from 'express';
 import { omit } from 'lodash';
 
-import { privateFields } from '../models/user.model';
+import { decrypt } from 'src/utils/crypto';
+import { privateFields, User } from '../models/user.model';
 import type { LoginInput } from '../schema/auth.schema';
 import { updateTokenVersion } from '../services/auth.service';
 import {
@@ -50,12 +51,19 @@ export const loginHandler = async (
     const { accessToken, refreshToken } = buildTokens(user);
     setTokens(res, accessToken, refreshToken);
 
+    const newUser = omit(user.toJSON(), privateFields) as User;
+    const decryptedUser = {
+      ...newUser,
+      firstName: decrypt(newUser.firstName),
+      lastName: decrypt(newUser.lastName),
+    };
+
     return res.status(SuccessType.OK).json({
       status: StatusType.Success,
       // accessToken,
       // refreshToken,
       data: {
-        user: omit(user.toJSON(), privateFields),
+        user: decryptedUser,
       },
     });
   } catch (error: any) {
