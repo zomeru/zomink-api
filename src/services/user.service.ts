@@ -4,7 +4,7 @@ import fetch from 'node-fetch';
 import type { FilterQuery, QueryOptions, UpdateQuery } from 'mongoose';
 import type { DocumentType } from '@typegoose/typegoose';
 
-import log from 'src/utils/logger';
+import log from '../utils/logger';
 import UserModel, { User } from '../models/user.model';
 
 export async function createUser(input: Partial<User>) {
