@@ -1,6 +1,6 @@
 import express from 'express';
 
-import { googleOAuthHandler } from 'src/controllers/oauth.controller';
+import { googleOAuthHandler } from '../controllers/oauth.controller';
 
 const router = express.Router();
 
