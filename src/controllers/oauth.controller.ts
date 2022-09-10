@@ -39,7 +39,7 @@ export const googleOAuthHandler = async (req: Request, res: Response) => {
         email: googleUser.email,
         firstName: encrypt(googleUser.given_name),
         lastName: encrypt(googleUser.family_name),
-        username: '',
+        username: googleUser.email,
         verified: googleUser.verified_email,
         password: '',
         authProviderId: googleUser.id,
@@ -55,7 +55,7 @@ export const googleOAuthHandler = async (req: Request, res: Response) => {
     setTokens(res, accessToken, refreshToken);
 
     res.redirect(process.env.CLIENT_ORIGIN!);
-  } catch (error) {
+  } catch (error: any) {
     return res.redirect(
       `${process.env.CLIENT_ORIGIN}/auth/login?error=Something went wrong. Please try again.`
     );
