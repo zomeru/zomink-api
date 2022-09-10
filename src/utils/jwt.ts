@@ -24,9 +24,9 @@ export interface RefreshToken extends RefreshTokenPayload {
 
 // eslint-disable-next-line no-shadow
 export enum TokenExpiration {
-  Access = 50 * 60,
-  Refresh = 7 * 24 * 60 * 60,
-  RefreshIfLessThan = 4 * 24 * 60 * 60,
+  Access = 60 * 60, // 1 hour
+  Refresh = 30 * 24 * 60 * 60, // 30 days
+  RefreshIfLessThan = 15 * 24 * 60 * 60, // 15 days
 }
 
 function signAccessToken(payload: AccessTokenPayload) {

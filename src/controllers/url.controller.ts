@@ -161,7 +161,7 @@ export const getUserUrls = async (
     })) as any[];
 
     if (!urls) {
-      return next(new AppError('No urls found', ErrorType.NotFoundException));
+      return next(new AppError('No url found', ErrorType.NotFoundException));
     }
 
     return res.status(SuccessType.OK).json({

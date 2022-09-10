@@ -8,7 +8,7 @@ export async function updateTokenVersion(userId: string) {
     { new: true }
   );
 
-  if (user == null) {
+  if (!user) {
     throw new Error('Error updating user');
   }
 }

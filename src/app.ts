@@ -46,7 +46,7 @@ const limiter = rateLimit({
   max: 500,
   message: 'Too many requests from this IP, please try again in an hour!',
 });
-app.use('/api', limiter);
+app.use('/', limiter);
 
 // Parse JSON bodies (as sent by API clients)
 app.use(express.json());
