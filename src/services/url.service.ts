@@ -1,7 +1,7 @@
 import URLModel from '../models/url.model';
 import type { CreateShortURLInput } from '../schema/url.schema';
 
-export async function createShortURL(input: CreateShortURLInput) {
+export function createShortURL(input: CreateShortURLInput) {
   return URLModel.create(input);
 }
 
