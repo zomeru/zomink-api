@@ -38,6 +38,7 @@
     "pino": "^8.4.2",
     "pino-pretty": "^9.1.0",
     "qs": "^6.11.0",
+    "ua-parser-js": "^1.0.2",
     "x-xss-protection": "^2.0.0",
     "zod": "^3.18.0"
   },
@@ -52,6 +53,7 @@
     "@types/node-fetch": "^2.6.2",
     "@types/nodemailer": "^6.4.5",
     "@types/nodemailer-express-handlebars": "^4.0.2",
+    "@types/ua-parser-js": "^0.7.36",
     "@typescript-eslint/eslint-plugin": "^5.36.0",
     "@typescript-eslint/parser": "^5.36.0",
     "cross-env": "^7.0.3",

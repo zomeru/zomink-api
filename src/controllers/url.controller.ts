@@ -1,6 +1,7 @@
 import type { NextFunction, Request, Response } from 'express';
 import { omit } from 'lodash';
 
+import { privateFields } from '../models/url.model';
 import type {
   CreateShortURLInput,
   GetShortURLInput,
@@ -73,7 +74,7 @@ export const createShortURLHandler = async (
         return res.status(SuccessType.Created).json({
           status: StatusType.Success,
           data: {
-            urlData: omit(shortUrl.toObject(), ['__v']),
+            urlData: omit(shortUrl.toObject(), privateFields),
           },
         });
       }
@@ -83,7 +84,7 @@ export const createShortURLHandler = async (
         return res.status(SuccessType.OK).json({
           status: StatusType.Success,
           data: {
-            urlData: omit(shortUrlWithoutUser.toObject(), ['__v']),
+            urlData: omit(shortUrlWithoutUser.toObject(), privateFields),
           },
         });
       }
@@ -140,7 +141,7 @@ export const createShortURLHandler = async (
     return res.status(SuccessType.Created).json({
       status: StatusType.Success,
       data: {
-        urlData: omit(shortUrl.toObject(), ['__v']),
+        urlData: omit(shortUrl.toObject(), privateFields),
       },
     });
   } catch (error: any) {
@@ -167,7 +168,7 @@ export const getUserUrls = async (
     return res.status(SuccessType.OK).json({
       status: StatusType.Success,
       data: {
-        urlData: urls.map((url: any) => omit(url.toObject(), ['__v'])),
+        urlData: urls.map((url: any) => omit(url.toObject(), privateFields)),
       },
     });
   } catch (error: any) {
@@ -178,7 +179,7 @@ export const getUserUrls = async (
 };
 
 export const getShortURL = async (
-  req: Request<GetShortURLInput>,
+  req: Request<GetShortURLInput, any>,
   res: Response,
   next: NextFunction
 ) => {
@@ -193,7 +194,9 @@ export const getShortURL = async (
 
     return res.status(SuccessType.OK).json({
       status: StatusType.Success,
-      link: url.link,
+      data: {
+        url: omit(url.toObject(), privateFields),
+      },
     });
   } catch (error: any) {
     return next(

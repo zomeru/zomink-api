@@ -7,7 +7,7 @@ import type { DocumentType } from '@typegoose/typegoose';
 import log from '../utils/logger';
 import UserModel, { User } from '../models/user.model';
 
-export async function createUser(input: Partial<User>) {
+export function createUser(input: Partial<User>) {
   return UserModel.create(input);
 }
 
