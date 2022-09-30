@@ -1,5 +1,6 @@
 import type { NextFunction, Request, Response } from 'express';
 import { omit } from 'lodash';
+import fetch from 'node-fetch';
 
 import { privateFields } from '../models/url.model';
 import type {
@@ -20,7 +21,7 @@ import {
   StatusType,
   SuccessType,
 } from '../utils/appError';
-import { aliasValid, linkValid } from '../utils/regEx';
+import { aliasValid, linkAccepted, linkValid } from '../utils/regEx';
 import { aliasGen, removeForwardSlash } from '../utils/urls';
 
 export const createShortURLHandler = async (
@@ -34,7 +35,24 @@ export const createShortURLHandler = async (
     let alias = '';
     const link = removeForwardSlash(body.link.trim());
 
-    if (!linkValid(link)) {
+    const destinationUrl = (await fetch(link)).url;
+    const isLinkValid = linkValid(destinationUrl);
+    const isLinkAccepted = await linkAccepted(destinationUrl);
+
+    // console.log('isLinkValid', isLinkValid);
+    // console.log('isLinkAccepted', isLinkAccepted);
+    // console.log('linkValid(link)', linkValid(link));
+
+    if (!isLinkAccepted) {
+      return next(
+        new AppError(
+          "We're sorry but we don't accept links from this domain",
+          ErrorType.BadRequestException
+        )
+      );
+    }
+
+    if (!linkValid(link) || !isLinkValid) {
       return next(new AppError('Invalid link', ErrorType.BadRequestException));
     }
 
