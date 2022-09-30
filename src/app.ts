@@ -43,7 +43,7 @@ if (process.env.NODE_ENV === 'development') {
 // limit requests from the same IP to 500 per hour
 const limiter = rateLimit({
   windowMs: 60 * 60 * 1000,
-  max: 500,
+  max: 300,
   message: 'Too many requests from this IP, please try again in an hour!',
 });
 app.use('/', limiter);
@@ -71,7 +71,6 @@ app.use(globalErrorHandler);
 const PORT = Number(process.env.PORT);
 app.listen(PORT, () => {
   if (process.env.NODE_ENV === 'development') {
-    log.info(PORT, typeof PORT);
     log.info(`Server started at http://localhost:${PORT}`);
   } else {
     log.info(`Server started`);
