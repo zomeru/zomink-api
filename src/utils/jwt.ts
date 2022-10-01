@@ -123,7 +123,7 @@ export function refreshTokens(current: RefreshToken, tokenVersion: string) {
   }
 
   const refreshToken =
-    refreshPayload != null ? signRefreshToken(refreshPayload) : undefined;
+    refreshPayload !== undefined ? signRefreshToken(refreshPayload) : undefined;
 
   return {
     accessToken,
