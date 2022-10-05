@@ -5,7 +5,7 @@ import { invalidLinks } from './invalidLink';
 const myDomain = 'zom.ink';
 
 // phishing domains
-const phishingDomains = async () => {
+export const phishingDomains = async () => {
   try {
     const response = await fetch(
       'https://raw.githubusercontent.com/mitchellkrogza/Phishing.Database/master/phishing-domains-ACTIVE.txt',
@@ -22,7 +22,7 @@ const phishingDomains = async () => {
 };
 
 // phishing links
-const phishingLinks = async () => {
+export const phishingLinks = async () => {
   try {
     const response = await fetch(
       'https://raw.githubusercontent.com/mitchellkrogza/Phishing.Database/master/phishing-links-ACTIVE.txt',
@@ -44,22 +44,22 @@ export const linkAccepted = async (link: string) => {
   const match = link.match(/^(?:https?:)?(?:\/\/)?([^\/\?]+)/i);
   const hostname = match && match[1];
 
-  const phishDomains = await phishingDomains();
-  const phishLinks = await phishingLinks();
+  // const phishDomains = await phishingDomains();
+  // const phishLinks = await phishingLinks();
 
   // !phishLinks
   //         .split('\n')
   //         .some((item) => item.toLowerCase() === link.toLowerCase()
 
   return (
-    (phishDomains
-      ? !phishDomains
-          .toLowerCase()
-          .includes(hostname?.replace('www.', '').toLowerCase() || myDomain)
-      : true) &&
-    (phishLinks
-      ? !phishLinks.toLowerCase().includes(link.toLowerCase())
-      : true) &&
+    // (phishDomains
+    //   ? !phishDomains
+    //       .toLowerCase()
+    //       .includes(hostname?.replace('www.', '').toLowerCase() || myDomain)
+    //   : true) &&
+    // (phishLinks
+    //   ? !phishLinks.toLowerCase().includes(link.toLowerCase())
+    //   : true) &&
     !invalidLinks.includes(hostname?.replace('www.', '') || myDomain)
   );
 };
