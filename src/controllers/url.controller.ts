@@ -2,6 +2,10 @@ import type { NextFunction, Request, Response } from 'express';
 import { omit } from 'lodash';
 import fetch from 'node-fetch';
 
+import { UAParser } from 'ua-parser-js';
+
+import type { InfoInput } from '../schema/click.schema';
+import { saveClick } from '../services/click.service';
 import { privateFields } from '../models/url.model';
 import type {
   CreateShortURLInput,
@@ -35,13 +39,10 @@ export const createShortURLHandler = async (
     let alias = '';
     const link = removeForwardSlash(body.link.trim());
 
-    const destinationUrl = (await fetch(link)).url;
-    const isLinkValid = linkValid(destinationUrl);
-    const isLinkAccepted = await linkAccepted(destinationUrl);
+    const destination = await fetch(link);
 
-    // console.log('isLinkValid', isLinkValid);
-    // console.log('isLinkAccepted', isLinkAccepted);
-    // console.log('linkValid(link)', linkValid(link));
+    const isLinkValid = linkValid(destination.url);
+    const isLinkAccepted = await linkAccepted(destination.url);
 
     if (!isLinkAccepted) {
       return next(
@@ -201,7 +202,11 @@ export const getShortURL = async (
   res: Response,
   next: NextFunction
 ) => {
-  const { alias } = req.params;
+  const { alias, userAgent } = req.params;
+
+  const decodedUserAgent = decodeURIComponent(userAgent);
+  let urlId = '';
+  let urlData: any;
 
   try {
     const url = await findUrlByAlias(alias);
@@ -210,15 +215,47 @@ export const getShortURL = async (
       return next(new AppError('Url not found', ErrorType.NotFoundException));
     }
 
+    urlData = omit(url.toObject(), privateFields);
+    urlId = url._id.toString();
+
     return res.status(SuccessType.OK).json({
       status: StatusType.Success,
       data: {
-        url: omit(url.toObject(), privateFields),
+        url: urlData,
       },
     });
   } catch (error: any) {
     return next(
       new AppError(error.message, ErrorType.InternalServerErrorException)
     );
+  } finally {
+    const locRes = await fetch('http://ip-api.com/json', {
+      method: 'GET',
+    });
+    const locData = await locRes.json();
+
+    const parser = new UAParser();
+    parser.setUA(decodedUserAgent);
+
+    const browser = parser.getBrowser().name;
+    const OS = parser.getOS().name;
+    const device = parser.getDevice();
+
+    const info: InfoInput = {
+      browser: browser || 'unknown',
+      OS: OS || 'unknown',
+      device: {
+        model: device.model || 'unknown',
+        type: device.type || 'unknown',
+      },
+      location: {
+        countryName: locData.country || 'unknown',
+        region: locData.regionName || 'unknown',
+        city: locData.city || 'unknown',
+        countryCode: locData.countryCode || 'unknown',
+      },
+    };
+
+    await saveClick(urlId, info);
   }
 };

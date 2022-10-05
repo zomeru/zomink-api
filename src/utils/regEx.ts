@@ -47,42 +47,33 @@ export const linkAccepted = async (link: string) => {
   const phishDomains = await phishingDomains();
   const phishLinks = await phishingLinks();
 
-  // console.log(
-  //   'not phishingDomain',
-  //   phishDomains
-  //     ? !phishDomains.includes(hostname?.replace('www.', '') || myDomain)
-  //     : true
-  // );
-  // console.log(
-  //   'not phishingLink',
-  //   phishLinks ? !phishLinks.includes(link) : true
-  // );
+  // !phishLinks
+  //         .split('\n')
+  //         .some((item) => item.toLowerCase() === link.toLowerCase()
 
   return (
     (phishDomains
       ? !phishDomains
-          .split('\n')
-          .some(
-            (item) =>
-              item.toLowerCase() === (hostname?.replace('www.', '') || myDomain)
-          )
+          .toLowerCase()
+          .includes(hostname?.replace('www.', '').toLowerCase() || myDomain)
       : true) &&
     (phishLinks
-      ? !phishLinks
-          .split('\n')
-          .some((item) => item.toLowerCase() === link.toLowerCase())
+      ? !phishLinks.toLowerCase().includes(link.toLowerCase())
       : true) &&
     !invalidLinks.includes(hostname?.replace('www.', '') || myDomain)
   );
 };
 
 export const linkValid = (link: string): boolean => {
+  const match = link.match(/^(?:https?:)?(?:\/\/)?([^\/\?]+)/i);
+  const hostname = match && match[1];
+
   const valid =
     !!link.match(
       /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/
     ) &&
     !link.includes(' ') &&
-    !link.includes(myDomain);
+    !hostname!.includes(myDomain);
 
   return valid;
 };
