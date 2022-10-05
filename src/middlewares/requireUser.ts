@@ -7,9 +7,6 @@ const requireUser = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const token = verifyAccessToken(req.cookies[NewCookies.AccessToken]);
 
-    console.log('verify access token', token);
-    console.log('req cookie access token', req.cookies[NewCookies.AccessToken]);
-
     if (token === null) {
       return next(
         new AppError('Unauthorized user', ErrorType.UnauthorizedException)

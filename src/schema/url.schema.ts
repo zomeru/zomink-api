@@ -19,6 +19,9 @@ export const getShortURLSchema = object({
     alias: string({
       required_error: 'Link not found',
     }).min(5, 'Link not found'),
+    userAgent: string({
+      required_error: 'Link not found',
+    }).min(1, 'Link not found'),
   }).refine((data) => aliasValid(data.alias), {
     message: 'Link not found',
     path: ['alias'],

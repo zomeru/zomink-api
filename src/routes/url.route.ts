@@ -17,7 +17,11 @@ router.post(
   createShortURLHandler
 );
 
-router.get('/:alias/urls', validateResource(getShortURLSchema), getShortURL);
+router.get(
+  '/:alias/:userAgent/urls',
+  validateResource(getShortURLSchema),
+  getShortURL
+);
 
 router.get('/urls/user', requireUser, getUserUrls);
 
