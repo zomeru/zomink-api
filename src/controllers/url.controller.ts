@@ -208,6 +208,9 @@ export const getShortURL = async (
   let urlId = '';
   let urlData: any;
 
+  console.log('alias', alias);
+  console.log('decodedUserAgent', decodedUserAgent);
+
   try {
     const url = await findUrlByAlias(alias);
 
@@ -217,6 +220,9 @@ export const getShortURL = async (
 
     urlData = omit(url.toObject(), privateFields);
     urlId = url._id.toString();
+
+    console.log('urlData', urlData);
+    console.log('urlId', urlId);
 
     return res.status(SuccessType.OK).json({
       status: StatusType.Success,
@@ -255,6 +261,8 @@ export const getShortURL = async (
         countryCode: locData.countryCode || 'unknown',
       },
     };
+
+    console.log('finally - click info', info);
 
     await saveClick(urlId, info);
   }
