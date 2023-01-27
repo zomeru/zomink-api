@@ -27,7 +27,6 @@ import {
 } from '../utils/appError';
 import { aliasValid, linkAccepted, linkValid } from '../utils/regEx';
 import { aliasGen, removeForwardSlash } from '../utils/urls';
-import log from '../utils/logger';
 
 export const createShortURLHandler = async (
   req: Request<{}, {}, CreateShortURLInput>,
@@ -269,35 +268,40 @@ export const getShortURL = async (
       new AppError(error.message, ErrorType.InternalServerErrorException)
     );
   } finally {
-    // const locRes = await fetch('http://ip-api.com/json', {
-    //   method: 'GET',
-    // });
-    // const locData = await locRes.json();
+    const url = await findUrlByAlias(alias);
 
-    // const parser = new UAParser();
-    // parser.setUA(decodedUserAgent);
+    if (!url) {
+      console.log('url not found');
+    } else {
+      const locRes = await fetch('http://ip-api.com/json', {
+        method: 'GET',
+      });
+      const locData = await locRes.json();
 
-    // const browser = parser.getBrowser().name;
-    // const OS = parser.getOS().name;
-    // const device = parser.getDevice();
+      const parser = new UAParser();
+      parser.setUA(userAgent);
 
-    // const info: InfoInput = {
-    //   browser: browser || 'unknown',
-    //   OS: OS || 'unknown',
-    //   device: {
-    //     model: device.model || 'unknown',
-    //     type: device.type || 'unknown',
-    //   },
-    //   location: {
-    //     countryName: locData.country || 'unknown',
-    //     region: locData.regionName || 'unknown',
-    //     city: locData.city || 'unknown',
-    //     countryCode: locData.countryCode || 'unknown',
-    //   },
-    // };
+      const browser = parser.getBrowser().name;
+      const OS = parser.getOS().name;
+      const device = parser.getDevice();
 
-    log.info('finally - click info asd');
+      const info: InfoInput = {
+        browser: browser || 'unknown',
+        OS: OS || 'unknown',
+        device: {
+          model: device.model || 'unknown',
+          type: device.type || 'unknown',
+        },
+        location: {
+          countryName: locData.country || 'unknown',
+          region: locData.regionName || 'unknown',
+          city: locData.city || 'unknown',
+          countryCode: locData.countryCode || 'unknown',
+        },
+      };
 
-    // await saveClick(urlId, info);
+      await saveClick(url._id.toString(), info);
+      console.log('click saved');
+    }
   }
 };
