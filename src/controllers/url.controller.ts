@@ -206,8 +206,8 @@ export const getShortURL = async (
   const { alias, userAgent } = req.params;
 
   const decodedUserAgent = decodeURIComponent(userAgent);
-  let urlId = '';
-  let urlData: any;
+  // let urlId = '';
+  // let urlData: any;
 
   log.info('alias', alias);
   log.info('decodedUserAgent', decodedUserAgent);
@@ -219,23 +219,12 @@ export const getShortURL = async (
       return next(new AppError('Url not found', ErrorType.NotFoundException));
     }
 
-    urlData = omit(url.toObject(), privateFields);
-    urlId = url._id.toString();
+    const urlData = omit(url.toObject(), privateFields);
+    const urlId = url._id.toString();
 
     log.info('urlData', urlData);
     log.info('urlId', urlId);
 
-    return res.status(SuccessType.OK).json({
-      status: StatusType.Success,
-      data: {
-        url: urlData,
-      },
-    });
-  } catch (error: any) {
-    return next(
-      new AppError(error.message, ErrorType.InternalServerErrorException)
-    );
-  } finally {
     const locRes = await fetch('http://ip-api.com/json', {
       method: 'GET',
     });
@@ -266,5 +255,47 @@ export const getShortURL = async (
     log.info('finally - click info', info);
 
     await saveClick(urlId, info);
+
+    return res.status(SuccessType.OK).json({
+      status: StatusType.Success,
+      data: {
+        url: urlData,
+      },
+    });
+  } catch (error: any) {
+    return next(
+      new AppError(error.message, ErrorType.InternalServerErrorException)
+    );
+  } finally {
+    // const locRes = await fetch('http://ip-api.com/json', {
+    //   method: 'GET',
+    // });
+    // const locData = await locRes.json();
+
+    // const parser = new UAParser();
+    // parser.setUA(decodedUserAgent);
+
+    // const browser = parser.getBrowser().name;
+    // const OS = parser.getOS().name;
+    // const device = parser.getDevice();
+
+    // const info: InfoInput = {
+    //   browser: browser || 'unknown',
+    //   OS: OS || 'unknown',
+    //   device: {
+    //     model: device.model || 'unknown',
+    //     type: device.type || 'unknown',
+    //   },
+    //   location: {
+    //     countryName: locData.country || 'unknown',
+    //     region: locData.regionName || 'unknown',
+    //     city: locData.city || 'unknown',
+    //     countryCode: locData.countryCode || 'unknown',
+    //   },
+    // };
+
+    log.info('finally - click info', 'asd');
+
+    // await saveClick(urlId, info);
   }
 };
