@@ -27,6 +27,7 @@ import {
 } from '../utils/appError';
 import { aliasValid, linkAccepted, linkValid } from '../utils/regEx';
 import { aliasGen, removeForwardSlash } from '../utils/urls';
+import log from '../utils/logger';
 
 export const createShortURLHandler = async (
   req: Request<{}, {}, CreateShortURLInput>,
@@ -208,8 +209,8 @@ export const getShortURL = async (
   let urlId = '';
   let urlData: any;
 
-  console.log('alias', alias);
-  console.log('decodedUserAgent', decodedUserAgent);
+  log.info('alias', alias);
+  log.info('decodedUserAgent', decodedUserAgent);
 
   try {
     const url = await findUrlByAlias(alias);
@@ -221,8 +222,8 @@ export const getShortURL = async (
     urlData = omit(url.toObject(), privateFields);
     urlId = url._id.toString();
 
-    console.log('urlData', urlData);
-    console.log('urlId', urlId);
+    log.info('urlData', urlData);
+    log.info('urlId', urlId);
 
     return res.status(SuccessType.OK).json({
       status: StatusType.Success,
@@ -262,7 +263,7 @@ export const getShortURL = async (
       },
     };
 
-    console.log('finally - click info', info);
+    log.info('finally - click info', info);
 
     await saveClick(urlId, info);
   }
