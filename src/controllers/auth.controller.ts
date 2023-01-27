@@ -194,6 +194,8 @@ export const verifyAccessTokenHandler = async (
   const { token } = req.params;
   const errorMessage = 'Unauthorized user';
 
+  console.log('token', token);
+
   try {
     const current = verifyAccessToken(token);
 

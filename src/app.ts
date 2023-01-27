@@ -4,7 +4,7 @@ import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import helmet from 'helmet';
-// import { createProxyMiddleware } from 'http-proxy-middleware';
+import { createProxyMiddleware } from 'http-proxy-middleware';
 import xXssProtection from 'x-xss-protection';
 import hpp from 'hpp';
 import rateLimit from 'express-rate-limit';
@@ -41,14 +41,6 @@ if (process.env.NODE_ENV === 'development') {
   app.use(morgan('tiny'));
 }
 
-// limit requests from the same IP to 500 per hour
-const limiter = rateLimit({
-  windowMs: 60 * 60 * 1000,
-  max: 300,
-  message: 'Too many requests from this IP, please try again in an hour!',
-});
-app.use('/', limiter);
-
 // Parse JSON bodies (as sent by API clients)
 app.use(express.json());
 
@@ -60,11 +52,19 @@ app.use(hpp());
 app.use(router);
 
 // Proxy middleware
-// const proxyOptions = {
-//   target: process.env.API_URL,
-//   changeOrigin: true,
-// };
-// app.use('/', createProxyMiddleware(proxyOptions));
+const proxyOptions = {
+  target: process.env.API_URL,
+  changeOrigin: true,
+};
+app.use('/', createProxyMiddleware(proxyOptions));
+
+// limit requests from the same IP to 500 per hour
+const limiter = rateLimit({
+  windowMs: 60 * 60 * 1000,
+  max: 300,
+  message: 'Too many requests from this IP, please try again in an hour!',
+});
+app.use('/', limiter);
 
 // Error handler
 app.use(globalErrorHandler);
