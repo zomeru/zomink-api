@@ -209,8 +209,8 @@ export const getShortURL = async (
   // let urlId = '';
   // let urlData: any;
 
-  log.info('alias', alias);
-  log.info('decodedUserAgent', decodedUserAgent);
+  console.log('alias', alias);
+  console.log('decodedUserAgent', decodedUserAgent);
 
   try {
     const url = await findUrlByAlias(alias);
@@ -222,8 +222,8 @@ export const getShortURL = async (
     const urlData = omit(url.toObject(), privateFields);
     const urlId = url._id.toString();
 
-    log.info('urlData', urlData);
-    log.info('urlId', urlId);
+    console.log('console urlData', urlData);
+    console.log('console urlId', urlId);
 
     const locRes = await fetch('http://ip-api.com/json', {
       method: 'GET',
@@ -252,9 +252,11 @@ export const getShortURL = async (
       },
     };
 
-    log.info('finally - click info', info);
+    console.log('click info', info);
 
     await saveClick(urlId, info);
+
+    console.log('sending status and urlData', urlData);
 
     return res.status(SuccessType.OK).json({
       status: StatusType.Success,
@@ -294,7 +296,7 @@ export const getShortURL = async (
     //   },
     // };
 
-    log.info('finally - click info', 'asd');
+    log.info('finally - click info asd');
 
     // await saveClick(urlId, info);
   }
