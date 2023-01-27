@@ -205,11 +205,6 @@ export const getShortURL = async (
   const { alias, userAgent } = req.params;
 
   const decodedUserAgent = decodeURIComponent(userAgent);
-  // let urlId = '';
-  // let urlData: any;
-
-  console.log('alias', alias);
-  console.log('decodedUserAgent', decodedUserAgent);
 
   try {
     const url = await findUrlByAlias(alias);
@@ -219,43 +214,6 @@ export const getShortURL = async (
     }
 
     const urlData = omit(url.toObject(), privateFields);
-    const urlId = url._id.toString();
-
-    console.log('console urlData', urlData);
-    console.log('console urlId', urlId);
-
-    const locRes = await fetch('http://ip-api.com/json', {
-      method: 'GET',
-    });
-    const locData = await locRes.json();
-
-    const parser = new UAParser();
-    parser.setUA(decodedUserAgent);
-
-    const browser = parser.getBrowser().name;
-    const OS = parser.getOS().name;
-    const device = parser.getDevice();
-
-    const info: InfoInput = {
-      browser: browser || 'unknown',
-      OS: OS || 'unknown',
-      device: {
-        model: device.model || 'unknown',
-        type: device.type || 'unknown',
-      },
-      location: {
-        countryName: locData.country || 'unknown',
-        region: locData.regionName || 'unknown',
-        city: locData.city || 'unknown',
-        countryCode: locData.countryCode || 'unknown',
-      },
-    };
-
-    console.log('click info', info);
-
-    await saveClick(urlId, info);
-
-    console.log('sending status and urlData', urlData);
 
     return res.status(SuccessType.OK).json({
       status: StatusType.Success,
@@ -271,7 +229,7 @@ export const getShortURL = async (
     const url = await findUrlByAlias(alias);
 
     if (!url) {
-      console.log('url not found');
+      console.log('click not saved - url not found');
     } else {
       const locRes = await fetch('http://ip-api.com/json', {
         method: 'GET',
@@ -279,7 +237,7 @@ export const getShortURL = async (
       const locData = await locRes.json();
 
       const parser = new UAParser();
-      parser.setUA(userAgent);
+      parser.setUA(decodedUserAgent);
 
       const browser = parser.getBrowser().name;
       const OS = parser.getOS().name;
@@ -301,7 +259,7 @@ export const getShortURL = async (
       };
 
       await saveClick(url._id.toString(), info);
-      console.log('click saved');
+      console.log('click data saved');
     }
   }
 };
