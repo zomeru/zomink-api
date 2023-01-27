@@ -4,7 +4,7 @@ import morgan from 'morgan';
 import cookieParser from 'cookie-parser';
 import dotenv from 'dotenv';
 import helmet from 'helmet';
-import { createProxyMiddleware } from 'http-proxy-middleware';
+// import { createProxyMiddleware } from 'http-proxy-middleware';
 import xXssProtection from 'x-xss-protection';
 import hpp from 'hpp';
 import rateLimit from 'express-rate-limit';
@@ -59,11 +59,11 @@ app.use(hpp());
 app.use(router);
 
 // Proxy middleware
-const proxyOptions = {
-  target: process.env.API_URL,
-  changeOrigin: true,
-};
-app.use('/', createProxyMiddleware(proxyOptions));
+// const proxyOptions = {
+//   target: process.env.API_URL,
+//   changeOrigin: true,
+// };
+// app.use('/', createProxyMiddleware(proxyOptions));
 
 // Error handler
 app.use(globalErrorHandler);
