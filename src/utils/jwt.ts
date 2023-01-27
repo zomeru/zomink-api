@@ -65,6 +65,7 @@ export enum NewCookies {
 /* eslint-enable  no-shadow */
 
 const defaultCookieOptions: CookieOptions = {
+  domain: process.env.CLIENT_DOMAIN,
   httpOnly: process.env.NODE_ENV === 'production',
   secure: process.env.NODE_ENV === 'production',
   sameSite: 'lax',
