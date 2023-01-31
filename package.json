@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "cross-env NODE_ENV=development tsx watch src/app.ts",
     "watch": "cross-env NODE_ENV=development nodemon",
-    "build": "rimraf dist && rimraf node_modules && yarn && etsc",
+    "build": "rimraf dist && etsc",
     "build:dev": "yarn lint && rimraf dist && etsc",
     "format": "prettier --write ./src",
     "lint": "eslint --ext .ts,.js ./src",
@@ -75,5 +75,5 @@
     "*.{js,ts}": "eslint --cache --fix",
     "*.{js,ts,md,json,yml,yaml}": "prettier --write"
   },
-  "packageManager": "yarn@3.2.3"
+  "packageManager": "yarn@1.2.19"
 }

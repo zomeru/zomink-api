@@ -20,7 +20,7 @@ const app = express();
 
 // CORS middleware
 const corsOptions = {
-  origin: [process.env.CLIENT_ORIGIN as string, 'http://localhost:3000'],
+  origin: process.env.CLIENT_ORIGIN as string,
   credentials: true,
   optionsSuccessStatus: 200,
 };
