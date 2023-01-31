@@ -96,7 +96,7 @@ export const createUserHandler = async (
 };
 
 export const getCurrentUserHandler = async (
-  req: Request,
+  _: Request,
   res: Response,
   next: NextFunction
 ) => {
