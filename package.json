@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "cross-env NODE_ENV=development tsx watch src/app.ts",
     "watch": "cross-env NODE_ENV=development nodemon",
-    "build": "rimraf dist && etsc",
+    "build": "rimraf node_modules && yarn install --frozen-lockfile && rimraf dist && etsc",
     "build:dev": "yarn lint && rimraf dist && etsc",
     "format": "prettier --write ./src",
     "lint": "eslint --ext .ts,.js ./src",
