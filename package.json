@@ -81,5 +81,5 @@
     "*.{js,ts}": "eslint --cache --fix",
     "*.{js,ts,md,json,yml,yaml}": "prettier --write"
   },
-  "packageManager": "yarn@1.2.19"
+  "packageManager": "^npm@8.15.0"
 }
