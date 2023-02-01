@@ -69,7 +69,7 @@ app.use('/', limiter);
 // Error handler
 app.use(globalErrorHandler);
 
-const PORT = Number(process.env.PORT);
+const PORT = Number(process.env.PORT) || 8000;
 app.listen(PORT, () => {
   if (process.env.NODE_ENV === 'development') {
     log.info(`Server started at http://localhost:${PORT}`);
