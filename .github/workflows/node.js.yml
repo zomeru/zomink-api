@@ -22,13 +22,13 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      # - name: Setup yarn
-      #   run: npm install -g yarn
+      - name: Setup yarn
+        run: npm install -g yarn
 
-      # - uses: c-hive/gha-yarn-cache@v2
+      - uses: c-hive/gha-yarn-cache@v2
 
       - name: Install dependencies
-        run: npm run install
+        run: yarn install
 
       - name: Build
         run: npm run build
