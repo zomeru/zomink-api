@@ -13,6 +13,7 @@
     "format": "prettier --write ./src",
     "lint": "eslint --ext .ts,.js ./src",
     "prepare": "husky install",
+    "install": "yarn install",
     "start": "node dist/app.js",
     "clean": "rimraf dist && rimraf node_modules && yarn"
   },
