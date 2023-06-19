@@ -4,10 +4,10 @@
   "main": "dist/app.js",
   "license": "MIT",
   "scripts": {
-    "dev": "concurrently \"yarn run watch-compile\" \"yarn run watch-dev\"",
+    "dev": "export NODE_ENV=development && concurrently \"yarn run watch-compile\" \"yarn run watch-dev\"",
     "watch-compile": "swc src -w --out-dir dist",
     "watch-dev": "nodemon --watch \"dist/**/*\" -e js ./dist/app.js",
-    "build": "rimraf dist && swc src -d dist",
+    "build": "export NODE_ENV=production && rimraf dist && swc src -d dist",
     "dev:etsc": "cross-env NODE_ENV=development nodemon",
     "build:etsc": "rimraf dist && etsc",
     "format": "prettier --write ./src",

@@ -32,7 +32,6 @@
     "noImplicitOverride": true,
     "noPropertyAccessFromIndexSignature": false,
     "noUncheckedIndexedAccess": true,
-    "importsNotUsedAsValues": "error",
     "checkJs": true
   }
   // "include": ["./src/**/*"]

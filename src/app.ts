@@ -50,6 +50,9 @@ app.use(hpp());
 
 // Routes
 app.use(router);
+app.get('/health', (_, res) => {
+  res.status(200).json({ status: 'OK' });
+});
 
 // Proxy middleware
 const proxyOptions = {
@@ -71,6 +74,7 @@ app.use(globalErrorHandler);
 
 const PORT = Number(process.env.PORT) || 8000;
 app.listen(PORT, () => {
+  console.log('NODE ENV', process.env.NODE_ENV);
   if (process.env.NODE_ENV === 'development') {
     log.info(`Server started at http://localhost:${PORT}`);
   } else {
